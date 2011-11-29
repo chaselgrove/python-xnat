@@ -1,6 +1,6 @@
 import nose.tools
 import pyxnat.core.resources
-from .. import Connection
+from .. import Connection, _UnboundExperiment
 
 def setup():
     global c, s
@@ -26,6 +26,12 @@ def test_projects():
     assert isinstance(s.projects, list)
     assert len(s.projects) == 1
     assert c.projects['CENTRAL_OASIS_CS'] in s.projects
+
+def test_experiments():
+    assert isinstance(s.experiments, dict)
+    assert len(s.experiments) == 1
+    assert 'OAS1_0001_CLIN_1' in s.experiments
+    assert isinstance(s.experiments['OAS1_0001_CLIN_1'], _UnboundExperiment)
 
 def teardown():
     c.close()

@@ -243,9 +243,9 @@ class _UnboundSubject(_BaseSubject):
     @property
     def experiments(self):
         if self._experiments is None:
-            self._experiments = []
+            self._experiments = {}
             for id in self.pyxnat_subject.experiments().get():
-                self._experiments.append(_UnboundExperiment(self, id))
+                self._experiments[id] = _UnboundExperiment(self, id)
         return self._experiments
 
 class _BoundSubject(_BaseSubject):
@@ -255,6 +255,7 @@ class _BoundSubject(_BaseSubject):
         self._project = project
         self._pyxnat_subject = None
         self._projects = None
+        self._experiments = None
         return
 
     def __repr__(self):
@@ -283,6 +284,14 @@ class _BoundSubject(_BaseSubject):
     @property
     def primary_label(self):
         return self.connection.get_subject(self.id).primary_label
+
+    @property
+    def experiments(self):
+        if self._experiments is None:
+            self._experiments = {}
+            for label in self.pyxnat_subject.experiments().get('label'):
+                self._experiments[label] = _BoundExperiment(self, label)
+        return self._experiments
 
 class _BaseExperiment(object):
 
