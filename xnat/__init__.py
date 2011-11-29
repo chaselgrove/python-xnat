@@ -94,13 +94,11 @@ class Connection(_BaseConnection):
         self._subjects = {}
         return
 
-    def __str__(self):
+    def __repr__(self):
         if not self.is_connected():
             return '<XNAT connection as %s to %s (closed)>' % (self.user, 
                                                                self.uri)
         return '<XNAT connection as %s to %s>' % (self.user, self.uri)
-
-    __repr__ = __str__
 
 class AnonymousConnection(_BaseConnection):
 
@@ -120,12 +118,10 @@ class AnonymousConnection(_BaseConnection):
         self._subjects = {}
         return
 
-    def __str__(self):
+    def __repr__(self):
         if not self.is_connected():
             return '<XNAT anonymous connection to %s (closed)>' % self.uri
         return '<XNAT anonymous connection to %s>' % self.uri
-
-    __repr__ = __str__
 
 class _Project(object):
 
@@ -137,10 +133,8 @@ class _Project(object):
         self._subjects = None
         return
 
-    def __str__(self):
+    def __repr__(self):
         return '<Project %s>' % self.id
-
-    __repr__ = __str__
 
     def _get_attribute(self, name):
         if self._attributes is None:
@@ -220,10 +214,8 @@ class _UnboundSubject(_BaseSubject):
         self._experiments = None
         return
 
-    def __str__(self):
+    def __repr__(self):
         return '<Subject %s>' % self.id
-
-    __repr__ = __str__
 
     def _get_attribute(self, name):
         if self._attributes is None:
@@ -265,10 +257,8 @@ class _BoundSubject(_BaseSubject):
         self._projects = None
         return
 
-    def __str__(self):
+    def __repr__(self):
         return '<Subject %s in Project %s>' % (self.id, self.project.id)
-
-    __repr__ = __str__
 
     @property
     def pyxnat_subject(self):
