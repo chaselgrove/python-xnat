@@ -1,1 +1,0 @@
-nosetests -w xnat -s
