@@ -299,6 +299,7 @@ class _BaseExperiment(object):
     def connection(self):
         return self._subject.connection
 
+    @property
     def xml(self):
         return self.pyxnat_experiment.get()
 
@@ -308,14 +309,71 @@ class _UnboundExperiment(_BaseExperiment):
         self.id = id
         self._subject = subject
         self._pyxnat_experiment = None
+        self._attributes = None
         return
+
+    def _get_attribute(self, name):
+        if self._attributes is None:
+            names = ['label']
+            values = self.pyxnat_experiment.attrs.mget(names)
+            self._attributes = dict(zip(names, values))
+        return self._attributes[name]
+
+    @property
+    def pyxnat_experiment(self):
+        if not self._pyxnat_experiment:
+            pyxnat_subject = self._subject.pyxnat_subject
+            self._pyxnat_experiment = pyxnat_subject.experiment(self.id)
+            assert self._pyxnat_experiment.exists()
+        return self._pyxnat_experiment
+
+    @property
+    def primary_subject(self):
+        return self._subject
+
+    @property
+    def primary_label(self):
+        return self._get_attribute('label')
 
 class _BoundExperiment(_BaseExperiment):
 
     def __init__(self, subject, label):
-        self.id = label
+        self.label = label
         self._subject = subject
         self._pyxnat_experiment = None
+        self._primary_subject = None
+        self._primary_label = None
         return
+
+    @property
+    def pyxnat_experiment(self):
+        if not self._pyxnat_experiment:
+            pyxnat_subject = self._subject.pyxnat_subject
+            self._pyxnat_experiment = pyxnat_subject.experiment(self.label)
+            assert self._pyxnat_experiment.exists()
+        return self._pyxnat_experiment
+
+    @property
+    def id(self):
+        return self.pyxnat_experiment.id()
+
+    @property
+    def subject(self):
+        return self._subject
+
+    @property
+    def primary_subject(self):
+        if not self._primary_subject:
+            primary_project = self._subject.primary_project
+            subject_primary_label = self._subject.primary_label
+            self._primary_subject = primary_project.subjects[subject_primary_label]
+        return self._primary_subject
+
+    @property
+    def primary_label(self):
+        if not self._primary_label:
+            unbound_subject = self.connection.get_subject(self.primary_subject.id)
+            self._primary_label = unbound_subject.experiments[self.id].primary_label
+        return self._primary_label
 
 # eof
