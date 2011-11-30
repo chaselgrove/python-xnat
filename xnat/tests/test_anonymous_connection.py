@@ -1,6 +1,6 @@
 import nose.tools
 import pyxnat.core.interfaces
-from .. import AnonymousConnection, _Project, NotConnectedError, _UnboundSubject
+from .. import AnonymousConnection, NotConnectedError, _Project
 
 def setup():
     global c
@@ -21,14 +21,10 @@ def test_projects():
     assert isinstance(c.projects, dict)
     assert 'CENTRAL_OASIS_CS' in c.projects
     assert isinstance(c.projects['CENTRAL_OASIS_CS'], _Project)
+    assert 'xxxxxxxx' not in c.projects
 
 def test_private_project():
     assert 'nosetests2' not in c.projects
-
-def test_get_subject():
-    assert isinstance(c.get_subject('OAS1_0001'), _UnboundSubject)
-    nose.tools.assert_raises(ValueError, lambda: c.get_subject('xxxxxxxx'))
-    nose.tools.assert_raises(ValueError, lambda: c.get_subject('Human_Buckner_Case01'))
 
 def test_close():
     c.close()

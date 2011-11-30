@@ -50,19 +50,6 @@ class _BaseConnection(object):
                 self._projects[project_id] = _Project(self, project_id)
         return self._projects
 
-    def get_subject(self, id):
-        if id not in self._subjects:
-            cols = ['xnat:subjectData/PROJECT']
-            crit = [('xnat:subjectData/SUBJECT_ID', '=', id)]
-            i = self.pyxnat_interface
-            res = i.select('xnat:subjectData', cols).where(crit)
-            if not len(res):
-                raise ValueError, id
-            project_id = res.items()[0][0]
-            project = self.projects[project_id]
-            self._subjects[id] = _UnboundSubject(project, id)
-        return self._subjects[id]
-
 class Connection(_BaseConnection):
 
     def __init__(self, uri=None, user=None, password=None):
@@ -96,9 +83,9 @@ class Connection(_BaseConnection):
 
     def __repr__(self):
         if not self.is_connected():
-            return '<XNAT connection as %s to %s (closed)>' % (self.user, 
+            return '<Connection as %s to %s (closed)>' % (self.user, 
                                                                self.uri)
-        return '<XNAT connection as %s to %s>' % (self.user, self.uri)
+        return '<Connection as %s to %s>' % (self.user, self.uri)
 
 class AnonymousConnection(_BaseConnection):
 
@@ -120,8 +107,8 @@ class AnonymousConnection(_BaseConnection):
 
     def __repr__(self):
         if not self.is_connected():
-            return '<XNAT anonymous connection to %s (closed)>' % self.uri
-        return '<XNAT anonymous connection to %s>' % self.uri
+            return '<Anonymous connection to %s (closed)>' % self.uri
+        return '<Anonymous connection to %s>' % self.uri
 
 class _Project(object):
 
@@ -134,7 +121,7 @@ class _Project(object):
         return
 
     def __repr__(self):
-        return '<Project %s>' % self.id
+        return '<Project %s>' % self.label
 
     def _get_attribute(self, name):
         if self._attributes is None:
@@ -158,7 +145,7 @@ class _Project(object):
         if self._subjects is None:
             self._subjects = {}
             for label in self.pyxnat_project.subjects().get('label'):
-                self._subjects[label] = _BoundSubject(self, label)
+                self._subjects[label] = _Subject(self, label)
         return self._subjects
 
     @property
@@ -181,11 +168,22 @@ class _Project(object):
     def xml(self):
         return self.pyxnat_project.get()
 
-class _BaseSubject(object):
+class _Subject(object):
 
-    @property
-    def connection(self):
-        return self._project.connection
+    def __init__(self, project, label):
+        self.project = project
+        self._projects = None
+        self._experiments = None
+        self.label = label
+        self.pyxnat_subject = self.project.pyxnat_project.subject(self.label)
+        self.id = self.pyxnat_subject.id()
+        self.connection = self.project.connection
+        self.primary_project = self.connection.projects[self.pyxnat_subject.attrs.get('project')]
+        self.primary_label = self.primary_project.pyxnat_project.subject(self.id).label()
+        return
+
+    def __repr__(self):
+        return '<Subject %s in Project %s>' % (self.label, self.project.label)
 
     @property
     def xml(self):
@@ -203,177 +201,32 @@ class _BaseSubject(object):
                     self._projects.append(project)
         return self._projects
 
-class _UnboundSubject(_BaseSubject):
-
-    def __init__(self, project, id):
-        self.id = id
-        self._project = project
-        self._pyxnat_subject = None
-        self._projects = None
-        self._attributes = None
-        self._experiments = None
-        return
-
-    def __repr__(self):
-        return '<Subject %s>' % self.id
-
-    def _get_attribute(self, name):
-        if self._attributes is None:
-            names = ['project', 'label']
-            values = self.pyxnat_subject.attrs.mget(names)
-            self._attributes = dict(zip(names, values))
-        return self._attributes[name]
-
-    @property
-    def pyxnat_subject(self):
-        if not self._pyxnat_subject:
-            pyxnat_project = self._project.pyxnat_project
-            self._pyxnat_subject = pyxnat_project.subject(self.id)
-            assert self._pyxnat_subject.exists()
-        return self._pyxnat_subject
-
-    @property
-    def primary_project(self):
-        return self._project
-
-    @property
-    def primary_label(self):
-        return self._get_attribute('label')
-
-    @property
-    def experiments(self):
-        if self._experiments is None:
-            self._experiments = {}
-            for id in self.pyxnat_subject.experiments().get():
-                self._experiments[id] = _UnboundExperiment(self, id)
-        return self._experiments
-
-class _BoundSubject(_BaseSubject):
-
-    def __init__(self, project, label):
-        self.label = label
-        self._project = project
-        self._pyxnat_subject = None
-        self._projects = None
-        self._experiments = None
-        return
-
-    def __repr__(self):
-        return '<Subject %s in Project %s>' % (self.id, self.project.id)
-
-    @property
-    def pyxnat_subject(self):
-        if not self._pyxnat_subject:
-            pyxnat_project = self._project.pyxnat_project
-            self._pyxnat_subject = pyxnat_project.subject(self.label)
-            assert self._pyxnat_subject.exists()
-        return self._pyxnat_subject
-
-    @property
-    def project(self):
-        return self._project
-
-    @property
-    def id(self):
-        return self.pyxnat_subject.id()
-
-    @property
-    def primary_project(self):
-        return self.connection.get_subject(self.id).primary_project
-
-    @property
-    def primary_label(self):
-        return self.connection.get_subject(self.id).primary_label
-
     @property
     def experiments(self):
         if self._experiments is None:
             self._experiments = {}
             for label in self.pyxnat_subject.experiments().get('label'):
-                self._experiments[label] = _BoundExperiment(self, label)
+                self._experiments[label] = _Experiment(self, label)
         return self._experiments
 
-class _BaseExperiment(object):
+class _Experiment(object):
 
-    @property
-    def connection(self):
-        return self._subject.connection
+    def __init__(self, subject, label):
+        self.label = label
+        self.subject = subject
+        self.pyxnat_experiment = self.subject.pyxnat_subject.experiment(self.label)
+        self.id = self.pyxnat_experiment.id()
+        self.primary_subject = self.subject.primary_project.subjects[self.subject.id]
+        self.primary_label = self.primary_subject.pyxnat_subject.experiment(self.id).label()
+        self.connection = self.subject.connection
+        return
+
+    def __repr__(self):
+        return '<Experiment %s in Project %s>' % (self.label, 
+                                                  self.subject.project.label)
 
     @property
     def xml(self):
         return self.pyxnat_experiment.get()
-
-class _UnboundExperiment(_BaseExperiment):
-
-    def __init__(self, subject, id):
-        self.id = id
-        self._subject = subject
-        self._pyxnat_experiment = None
-        self._attributes = None
-        return
-
-    def _get_attribute(self, name):
-        if self._attributes is None:
-            names = ['label']
-            values = self.pyxnat_experiment.attrs.mget(names)
-            self._attributes = dict(zip(names, values))
-        return self._attributes[name]
-
-    @property
-    def pyxnat_experiment(self):
-        if not self._pyxnat_experiment:
-            pyxnat_subject = self._subject.pyxnat_subject
-            self._pyxnat_experiment = pyxnat_subject.experiment(self.id)
-            assert self._pyxnat_experiment.exists()
-        return self._pyxnat_experiment
-
-    @property
-    def primary_subject(self):
-        return self._subject
-
-    @property
-    def primary_label(self):
-        return self._get_attribute('label')
-
-class _BoundExperiment(_BaseExperiment):
-
-    def __init__(self, subject, label):
-        self.label = label
-        self._subject = subject
-        self._pyxnat_experiment = None
-        self._primary_subject = None
-        self._primary_label = None
-        return
-
-    @property
-    def pyxnat_experiment(self):
-        if not self._pyxnat_experiment:
-            pyxnat_subject = self._subject.pyxnat_subject
-            self._pyxnat_experiment = pyxnat_subject.experiment(self.label)
-            assert self._pyxnat_experiment.exists()
-        return self._pyxnat_experiment
-
-    @property
-    def id(self):
-        return self.pyxnat_experiment.id()
-
-    @property
-    def subject(self):
-        return self._subject
-
-    @property
-    def primary_subject(self):
-        if not self._primary_subject:
-            primary_project = self._subject.primary_project
-            subject_primary_label = self._subject.primary_label
-            self._primary_subject = primary_project.subjects[subject_primary_label]
-        return self._primary_subject
-
-    @property
-    def primary_label(self):
-        if not self._primary_label:
-            unbound_subject = self.connection.get_subject(self.primary_subject.id)
-            self._primary_label = unbound_subject.experiments[self.id].primary_label
-        return self._primary_label
 
 # eof

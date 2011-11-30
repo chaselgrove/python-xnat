@@ -1,6 +1,6 @@
 import nose.tools
 import pyxnat.core.resources
-from .. import Connection, _BoundSubject
+from .. import Connection, _Subject
 
 def setup():
     global c, p, label, description, name, secondary_id
@@ -26,10 +26,11 @@ def test_attributes():
 
 def test_subjects():
     assert isinstance(p.subjects, dict)
-    assert 'OAS2_0010' in p.subjects
-    assert isinstance(p.subjects['OAS2_0010'], _BoundSubject)
-    assert 'xxxxxxxx' not in p.subjects
-    assert 'CENTRAL_S00088' not in p.subjects
+    # label of a subject
+    assert 'OAS2_0001' in p.subjects
+    # ID of the same subject
+    assert 'CENTRAL_S00081' not in p.subjects
+    assert isinstance(p.subjects['OAS2_0001'], _Subject)
 
 def teardown():
     c.close()
