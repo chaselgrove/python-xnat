@@ -222,8 +222,8 @@ class _Experiment(object):
         return
 
     def __repr__(self):
-        return '<Experiment %s in Project %s>' % (self.label, 
-                                                  self.subject.project.label)
+        return '<Experiment %s for Subject %s>' % (self.label, 
+                                                   self.subject.label)
 
     @property
     def xml(self):
@@ -257,21 +257,56 @@ class _Scan(object):
 
     def __init__(self, experiment, id):
         self.experiment = experiment
+        self.subject = self.experiment.subject
+        self.project = self.subject.project
+        self.connection = self.project.connection
         self.id = id
+        self.pyxnat_scan = self.experiment.pyxnat_experiment.scan(self.id)
         return
+
+    def __repr__(self):
+        return '<Scan %s for Experiment %s>' % (self.id, self.experiment.label)
+
+    @property
+    def xml(self):
+        return self.pyxnat_scan.get()
 
 class _Reconstruction(object):
 
     def __init__(self, experiment, id):
         self.experiment = experiment
+        self.subject = self.experiment.subject
+        self.project = self.subject.project
+        self.connection = self.project.connection
         self.id = id
+        self.pyxnat_reconstruction = self.experiment.pyxnat_experiment.reconstruction(self.id)
         return
+
+    def __repr__(self):
+        return '<Reconstruction %s for Experiment %s>' % (self.id, 
+                                                          self.experiment.label)
+
+    @property
+    def xml(self):
+        return self.pyxnat_reconstruction.get()
 
 class _Assessment(object):
 
     def __init__(self, experiment, id):
         self.experiment = experiment
+        self.subject = self.experiment.subject
+        self.project = self.subject.project
+        self.connection = self.project.connection
         self.id = id
+        self.pyxnat_assessment = self.experiment.pyxnat_experiment.assessor(self.id)
         return
+
+    def __repr__(self):
+        return '<Assessment %s for Experiment %s>' % (self.id, 
+                                                      self.experiment.label)
+
+    @property
+    def xml(self):
+        return self.pyxnat_assessment.get()
 
 # eof
