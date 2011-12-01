@@ -1,5 +1,5 @@
 test:
-	nosetests -w xnat -s
+	nosetests -w xnat
 
 clean:
 	find . -name "*.pyc" -exec rm -v {} \;
