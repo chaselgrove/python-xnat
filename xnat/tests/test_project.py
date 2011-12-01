@@ -3,10 +3,9 @@ import pyxnat.core.resources
 from .. import Connection, _Subject
 
 def setup():
-    global c, p, label, description, name, secondary_id
+    global c, p, description, name, secondary_id
     c = Connection('https://central.xnat.org', 'nosetests', 'nosetests')
     p = c.projects['CENTRAL_OASIS_LONG']
-    label = p.pyxnat_project.label()
     description = p.pyxnat_project.attrs.get('description')
     name = p.pyxnat_project.attrs.get('name')
     secondary_id = p.pyxnat_project.attrs.get('secondary_ID')
@@ -16,7 +15,6 @@ def test_attributes():
     assert p.connection is c
     assert isinstance(p.pyxnat_project, pyxnat.core.resources.Project)
     assert p.name == name
-    assert p.label == label
     assert p.description == description
     assert p.secondary_id == secondary_id
     assert isinstance(p.pyxnat_project, pyxnat.core.resources.Project)

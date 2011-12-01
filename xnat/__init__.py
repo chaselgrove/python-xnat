@@ -121,7 +121,7 @@ class _Project(object):
         return
 
     def __repr__(self):
-        return '<Project %s>' % self.label
+        return '<Project %s>' % self.id
 
     def _get_attribute(self, name):
         if self._attributes is None:
@@ -147,10 +147,6 @@ class _Project(object):
             for label in self.pyxnat_project.subjects().get('label'):
                 self._subjects[label] = _Subject(self, label)
         return self._subjects
-
-    @property
-    def label(self):
-        return self.pyxnat_project.label()
 
     @property
     def name(self):
@@ -214,11 +210,15 @@ class _Experiment(object):
     def __init__(self, subject, label):
         self.label = label
         self.subject = subject
+        self.project = self.subject.project
         self.pyxnat_experiment = self.subject.pyxnat_subject.experiment(self.label)
         self.id = self.pyxnat_experiment.id()
         self.primary_subject = self.subject.primary_project.subjects[self.subject.id]
         self.primary_label = self.primary_subject.pyxnat_subject.experiment(self.id).label()
         self.connection = self.subject.connection
+        self._scans = None
+        self._reconstructions = None
+        self._assessments = None
         return
 
     def __repr__(self):
@@ -228,5 +228,50 @@ class _Experiment(object):
     @property
     def xml(self):
         return self.pyxnat_experiment.get()
+
+    @property
+    def scans(self):
+        if self._scans is None:
+            self._scans = {}
+            for id in self.pyxnat_experiment.scans().get():
+                self._scans[id] = _Scan(self, id)
+        return self._scans
+
+    @property
+    def reconstructions(self):
+        if self._reconstructions is None:
+            self._reconstructions = {}
+            for id in self.pyxnat_experiment.reconstructions().get():
+                self._reconstructions[id] = _Reconstruction(self, id)
+        return self._reconstructions
+
+    @property
+    def assessments(self):
+        if self._assessments is None:
+            self._assessments = {}
+            for id in self.pyxnat_experiment.assessors().get():
+                self._assessments[id] = _Assessment(self, id)
+        return self._assessments
+
+class _Scan(object):
+
+    def __init__(self, experiment, id):
+        self.experiment = experiment
+        self.id = id
+        return
+
+class _Reconstruction(object):
+
+    def __init__(self, experiment, id):
+        self.experiment = experiment
+        self.id = id
+        return
+
+class _Assessment(object):
+
+    def __init__(self, experiment, id):
+        self.experiment = experiment
+        self.id = id
+        return
 
 # eof
