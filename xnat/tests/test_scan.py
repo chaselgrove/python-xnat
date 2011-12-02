@@ -1,5 +1,5 @@
 import pyxnat.core.resources
-from .. import Connection
+from .. import Connection, _ScanResource
 
 def setup():
     global connection, project, subject, experiment, scan
@@ -21,6 +21,12 @@ def test_attributes():
     assert isinstance(scan.xml, str)
     assert scan.xml.startswith('<?xml version="1.0" encoding="UTF-8"?>\n<xnat:MRScan ID="mpr-1"')
     assert scan.xml.endswith('</xnat:MRScan>\n')
+
+def test_resources():
+    assert isinstance(scan.resources, dict)
+    assert 'ANALYZE' in scan.resources
+    assert isinstance(scan.resources['ANALYZE'], _ScanResource)
+    assert len(scan.resources) == 1
 
 def teardown():
     connection.close()

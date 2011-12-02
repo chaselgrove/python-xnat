@@ -262,6 +262,7 @@ class _Scan(object):
         self.connection = self.project.connection
         self.id = id
         self.pyxnat_scan = self.experiment.pyxnat_experiment.scan(self.id)
+        self._resources = None
         return
 
     def __repr__(self):
@@ -270,6 +271,14 @@ class _Scan(object):
     @property
     def xml(self):
         return self.pyxnat_scan.get()
+
+    @property
+    def resources(self):
+        if self._resources is None:
+            self._resources = {}
+            for label in self.pyxnat_scan.resources().get('label'):
+                self._resources[label] = _ScanResource(self, label)
+        return self._resources
 
 class _Reconstruction(object):
 
@@ -308,5 +317,71 @@ class _Assessment(object):
     @property
     def xml(self):
         return self.pyxnat_assessment.get()
+
+class _BaseResource(object):
+
+    pass
+
+class _ScanResource(_BaseResource):
+
+    def __init__(self, scan, label):
+        self.scan = scan
+        self.experiment = scan.experiment
+        self.subject = scan.subject
+        self.project = scan.project
+        self.connection = scan.connection
+        self.label = label
+        self._files = None
+        self.pyxnat_resource = self.scan.pyxnat_scan.resource(self.label)
+        self.id = int(self.pyxnat_resource.id())
+        # 2011-12-02 bug: files are not returned for shared resources
+        # so we set self._primary_scan, delay self._primary_resource until 
+        # needed, and use that in self.files below
+        # _File also uses this primary resource
+        primary_subject = self.experiment.primary_subject
+        primary_experiment = primary_subject.experiments[self.experiment.id]
+        self._primary_scan = primary_experiment.scans[self.scan.id]
+        return
+
+    def __repr__(self):
+        return '<Resource %s for Scan %s>' % (self.label, self.scan.label)
+
+    @property
+    def _primary_resource(self):
+        return self._primary_scan.resources[self.label]
+
+    @property
+    def files(self):
+        if self._files is None:
+            self._files = {}
+            for f in self._primary_resource.pyxnat_resource.files():
+                path = f.attributes()['path']
+                self._files[path] = _File(self, self._primary_resource, path)
+        return self._files
+
+class _File(object):
+
+    def __init__(self, resource, primary_resource, path):
+        self.resource = resource
+        self._primary_resource = primary_resource
+        self.path = path
+        self.connection = self.resource.connection
+        self.pyxnat_file = self._primary_resource.pyxnat_resource.file(self.path)
+        return
+
+    def __repr__(self):
+        return '<File %s for Resource %s>' % (self.path, self.resource.label)
+
+    @property
+    def size(self):
+        return int(self.pyxnat_file.size())
+
+    @property
+    def last_modified(self):
+        return self.pyxnat_file.last_modified()
+
+    def read(self):
+        fname = self.pyxnat_file.get()
+        return open(fname).read()
 
 # eof
