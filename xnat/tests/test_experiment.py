@@ -2,12 +2,13 @@ import pyxnat.core.resources
 from .. import Connection, _Scan, _Reconstruction, _Assessment
 
 def setup():
-    global c, p, s, e, ps
+    global c, p, s, e, ps, workflow_experiment
     c = Connection('https://central.xnat.org', 'nosetests', 'nosetests')
     p = c.projects['PALS']
     s = p.subjects['Human_Buckner_Case01']
     e = s.experiments['Human_Buckner_Case01']
     ps = c.projects['CENTRAL_OASIS_CS'].subjects['OAS1_0054']
+    workflow_experiment = c.projects['Calib'].subjects['73213384'].experiments['73213384_DUKE']
 
 def test_attributes():
     assert e.connection is c
@@ -42,6 +43,9 @@ def test_assessments():
     assert isinstance(e.assessments['OAS1_0054_MR1_ASEG'], _Assessment)
     assert 'xxxxxxxx' not in e.assessments
     assert len(e.assessments) == 4
+
+def test_workflows():
+    assert isinstance(e.workflows, dict)
 
 def teardown():
     c.close()

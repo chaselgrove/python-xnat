@@ -179,7 +179,7 @@ class _Subject(object):
         return
 
     def __repr__(self):
-        return '<Subject %s in Project %s>' % (self.label, self.project.label)
+        return '<Subject %s in Project %s>' % (self.label, self.project.id)
 
     @property
     def xml(self):
@@ -213,12 +213,14 @@ class _Experiment(object):
         self.project = self.subject.project
         self.pyxnat_experiment = self.subject.pyxnat_subject.experiment(self.label)
         self.id = self.pyxnat_experiment.id()
-        self.primary_subject = self.subject.primary_project.subjects[self.subject.id]
+        primary_subject_label = self.subject.primary_project.pyxnat_project.subject(self.subject.id).label()
+        self.primary_subject = self.subject.primary_project.subjects[primary_subject_label]
         self.primary_label = self.primary_subject.pyxnat_subject.experiment(self.id).label()
         self.connection = self.subject.connection
         self._scans = None
         self._reconstructions = None
         self._assessments = None
+        self._workflows = None
         return
 
     def __repr__(self):
@@ -252,6 +254,12 @@ class _Experiment(object):
             for id in self.pyxnat_experiment.assessors().get():
                 self._assessments[id] = _Assessment(self, id)
         return self._assessments
+
+    @property
+    def workflows(self):
+        if self._workflows is None:
+            self._workflows = {}
+        return self._workflows
 
 class _Scan(object):
 
@@ -339,7 +347,8 @@ class _ScanResource(_BaseResource):
         # needed, and use that in self.files below
         # _File also uses this primary resource
         primary_subject = self.experiment.primary_subject
-        primary_experiment = primary_subject.experiments[self.experiment.id]
+        primary_experiment_label = primary_subject.pyxnat_subject.experiment(self.experiment.id).label()
+        primary_experiment = primary_subject.experiments[primary_experiment_label]
         self._primary_scan = primary_experiment.scans[self.scan.id]
         return
 
@@ -383,5 +392,12 @@ class _File(object):
     def read(self):
         fname = self.pyxnat_file.get()
         return open(fname).read()
+
+class _Workflow(object):
+
+    def __init__(self, experiment, id):
+        self.experiment = experiment
+        self.id = id
+        return
 
 # eof
