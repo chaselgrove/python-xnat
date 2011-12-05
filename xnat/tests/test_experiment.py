@@ -1,5 +1,5 @@
 import pyxnat.core.resources
-from .. import Connection, _Scan, _Reconstruction, _Assessment
+from .. import Connection, _Scan, _Reconstruction, _Assessment, _Workflow
 
 def setup():
     global c, p, s, e, ps, workflow_experiment
@@ -45,7 +45,10 @@ def test_assessments():
     assert len(e.assessments) == 4
 
 def test_workflows():
-    assert isinstance(e.workflows, dict)
+    assert isinstance(workflow_experiment.workflows, dict)
+    assert 475 in workflow_experiment.workflows
+    assert isinstance(workflow_experiment.workflows[475], _Workflow)
+    assert len(e.workflows) == 0
 
 def teardown():
     c.close()

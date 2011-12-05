@@ -1,4 +1,11 @@
 import os
+try:
+    import suds
+except ImportError:
+    suds = None
+if suds:
+    import urllib2
+    import urlparse
 import pyxnat
 
 if 'PYTHON_XNAT_DEBUG' in os.environ:
@@ -22,11 +29,24 @@ class XNATError(Exception):
 class NotConnectedError(XNATError):
     "not connected"
 
+class HTTPSudsPreprocessor(urllib2.BaseHandler):
+
+    def http_request(self, req):
+        req.add_header('Cookie', 'JSESSIONID=%s' % self.jsessionid)
+        return req
+
+    https_request = http_request
+
 class _BaseConnection(object):
 
     def _check_connected(self):
         if not self.is_connected():
             raise NotConnectedError
+        return
+
+    def _check_suds(self):
+        if suds is None:
+            raise ImportError, 'Module suds not found'
         return
 
     def is_connected(self):
@@ -49,6 +69,37 @@ class _BaseConnection(object):
             for project_id in self.pyxnat_interface.select.projects().get():
                 self._projects[project_id] = _Project(self, project_id)
         return self._projects
+
+    @property
+    def _jsessionid(self):
+        self._check_connected()
+        return self.pyxnat_interface._jsession.split('=')[1]
+
+    def _soap_call(self, jws, operation, inputs):
+        self._check_suds()
+        self._check_connected()
+        if urlparse.urlparse(self.uri).scheme == 'https':
+            t = suds.transport.https.HttpTransport()
+        else:
+            t = suds.transport.http.HttpTransport()
+        t.urlopener = urllib2.build_opener(HTTPSudsPreprocessor)
+        for h in t.urlopener.handlers:
+            if isinstance(h, HTTPSudsPreprocessor):
+                h.jsessionid = self._jsessionid
+        ws_url = '%s/axis/%s' % (self.uri, jws)
+        client = suds.client.Client('%s?wsdl' % ws_url, transport=t)
+        client.add_prefix('se', 'http://schemas.xmlsoap.org/soap/encoding/')
+        typed_inputs = []
+        for var in inputs:
+            if isinstance(var, basestring):
+                ti = client.factory.create('se:string')
+                ti.value = var
+                typed_inputs.append(ti)
+            else:
+                raise TypeError, 'unsupported type for variable'
+        client.set_options(location=ws_url)
+        f = getattr(client.service, operation)
+        return f(*typed_inputs)
 
 class Connection(_BaseConnection):
 
@@ -259,6 +310,23 @@ class _Experiment(object):
     def workflows(self):
         if self._workflows is None:
             self._workflows = {}
+            inputs = (self.connection._jsessionid, 
+                      'wrk:workflowData.ID', 
+                      '=', 
+                      self.id, 
+                      'wrk:workflowData')
+            try:
+                w_ids = self.connection._soap_call('GetIdentifiers.jws', 
+                                                   'search', 
+                                                   inputs)
+            # this exception with this message is raised if there are no workflows
+            except suds.WebFault, data:
+                if not "Field not found: 'wrk:workflowData/label'" in str(data):
+                    raise
+                w_ids = []
+            for w_id in w_ids:
+                w_id = int(w_id)
+                self._workflows[w_id] = _Workflow(self, w_id)
         return self._workflows
 
 class _Scan(object):
