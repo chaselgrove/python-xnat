@@ -1,6 +1,6 @@
 import nose.tools
 import pyxnat.core.resources
-from .. import Connection, _Subject, _ProjectResource, _SubjectResource, _ExperimentResource, _ScanResource, _AssessmentResource, _ReconstructionResource
+from .. import Connection, _Subject, _ProjectResource, _SubjectResource, _ExperimentResource, _ScanResource, _ReconstructionInResource, _ReconstructionOutResource, _AssessmentInResource, _AssessmentOutResource
 
 def setup():
     global c, project, subject, experiment, scan, assessment, reconstruction
@@ -27,7 +27,7 @@ def test_subject_resources():
 def test_experiment_resources():
     assert isinstance(experiment.resources, dict)
     assert 'hx' in experiment.resources
-    assert isinstance(experiment.resources['hx'], _SubjectResource)
+    assert isinstance(experiment.resources['hx'], _ExperimentResource)
     assert len(subject.resources) == 1
 
 def test_scan_resources():
@@ -41,8 +41,8 @@ def test_reconstruction_resources():
     assert isinstance(reconstruction.out_resources, dict)
     assert 'tir' in reconstruction.in_resources
     assert 'tor' in reconstruction.out_resources
-    assert isinstance(reconstruction.in_resources['tir'], _ReconstructionResource)
-    assert isinstance(reconstruction.out_resources['tor'], _ReconstructionResource)
+    assert isinstance(reconstruction.in_resources['tir'], _ReconstructionInResource)
+    assert isinstance(reconstruction.out_resources['tor'], _ReconstructionOutResource)
     assert len(reconstruction.in_resources) == 1
     assert len(reconstruction.out_resources) == 1
 
@@ -51,8 +51,8 @@ def test_assessment_resources():
     assert isinstance(assessment.out_resources, dict)
     assert 'tia' in assessment.in_resources
     assert 'toa' in assessment.out_resources
-    assert isinstance(assessment.in_resources['tia'], _AssessmentResource)
-    assert isinstance(assessment.out_resources['toa'], _AssessmentResource)
+    assert isinstance(assessment.in_resources['tia'], _AssessmentInResource)
+    assert isinstance(assessment.out_resources['toa'], _AssessmentOutResource)
     assert len(assessment.in_resources) == 1
     assert len(assessment.out_resources) == 1
 

@@ -353,7 +353,7 @@ class _Experiment(object):
         if self._resources is None:
             self._resources = {}
             for label in self.pyxnat_experiment.resources().get('label'):
-                self._resources[label] = _SubjectResource(self, label)
+                self._resources[label] = _ExperimentResource(self, label)
         return self._resources
 
 class _Scan(object):
@@ -409,7 +409,7 @@ class _Reconstruction(object):
         if self._in_resources is None:
             self._in_resources = {}
             for label in self.pyxnat_reconstruction.in_resources().get('label'):
-                self._in_resources[label] = _ReconstructionResource(self, label)
+                self._in_resources[label] = _ReconstructionInResource(self, label)
         return self._in_resources
 
     @property
@@ -417,7 +417,7 @@ class _Reconstruction(object):
         if self._out_resources is None:
             self._out_resources = {}
             for label in self.pyxnat_reconstruction.out_resources().get('label'):
-                self._out_resources[label] = _ReconstructionResource(self, label)
+                self._out_resources[label] = _ReconstructionOutResource(self, label)
         return self._out_resources
 
 class _Assessment(object):
@@ -446,7 +446,7 @@ class _Assessment(object):
         if self._in_resources is None:
             self._in_resources = {}
             for label in self.pyxnat_assessment.in_resources().get('label'):
-                self._in_resources[label] = _AssessmentResource(self, label)
+                self._in_resources[label] = _AssessmentInResource(self, label)
         return self._in_resources
 
     @property
@@ -454,7 +454,7 @@ class _Assessment(object):
         if self._out_resources is None:
             self._out_resources = {}
             for label in self.pyxnat_assessment.out_resources().get('label'):
-                self._out_resources[label] = _AssessmentResource(self, label)
+                self._out_resources[label] = _AssessmentOutResource(self, label)
         return self._out_resources
 
 class _BaseResource(object):
@@ -466,21 +466,72 @@ class _ProjectResource(_BaseResource):
     def __init__(self, project, label):
         self.project = project
         self.label = label
+        self.connection = project.connection
+        self.pyxnat_resource = self.project.pyxnat_project.resource(self.label)
+        self.id = int(self.pyxnat_resource.id())
+        self._files = None
         return
+
+    def __repr__(self):
+        return '<Resource %s for Project %s>' % (self.label, self.project.id)
+
+    @property
+    def files(self):
+        if self._files is None:
+            self._files = {}
+            for f in self.pyxnat_resource.files():
+                path = f.attributes()['path']
+                self._files[path] = _File(self, self, path)
+        return self._files
 
 class _SubjectResource(_BaseResource):
 
     def __init__(self, subject, label):
         self.subject = subject
+        self.project = subject.project
         self.label = label
+        self.connection = subject.connection
+        self.pyxnat_resource = self.subject.pyxnat_subject.resource(self.label)
+        self.id = int(self.pyxnat_resource.id())
+        self._files = None
         return
+
+    def __repr__(self):
+        return '<Resource %s for Subject %s>' % (self.label, self.subject.label)
+
+    @property
+    def files(self):
+        if self._files is None:
+            self._files = {}
+            for f in self.pyxnat_resource.files():
+                path = f.attributes()['path']
+                self._files[path] = _File(self, self, path)
+        return self._files
 
 class _ExperimentResource(_BaseResource):
 
-    def __init(self, experiment, label):
+    def __init__(self, experiment, label):
         self.experiment = experiment
+        self.subject = experiment.subject
+        self.project = self.subject.project
         self.label = label
+        self.connection = experiment.connection
+        self.pyxnat_resource = self.experiment.pyxnat_experiment.resource(self.label)
+        self.id = int(self.pyxnat_resource.id())
+        self._files = None
         return
+
+    def __repr__(self):
+        return '<Resource %s for Experiment %s>' % (self.label, self.experiment.label)
+
+    @property
+    def files(self):
+        if self._files is None:
+            self._files = {}
+            for f in self.pyxnat_resource.files():
+                path = f.attributes()['path']
+                self._files[path] = _File(self, self, path)
+        return self._files
 
 class _ScanResource(_BaseResource):
 
@@ -520,19 +571,96 @@ class _ScanResource(_BaseResource):
                 self._files[path] = _File(self, self._primary_resource, path)
         return self._files
 
-class _AssessmentResource(_BaseResource):
+class _BaseReconstructionResource(_BaseResource):
 
-    def __init__(self, assessment, label):
-        self.assessment = assessment
-        self.label = label
-        return
+    @property
+    def files(self):
+        if self._files is None:
+            self._files = {}
+            for f in self.pyxnat_resource.files():
+                path = f.attributes()['path']
+                self._files[path] = _File(self, self, path)
+        return self._files
 
-class _ReconstructionResource(_BaseResource):
+class _ReconstructionInResource(_BaseReconstructionResource):
 
     def __init__(self, reconstruction, label):
         self.reconstruction = reconstruction
+        self.experiment = reconstruction.experiment
+        self.subject = reconstruction.subject
+        self.project = reconstruction.project
+        self.connection = reconstruction.connection
         self.label = label
+        self.pyxnat_resource = self.reconstruction.pyxnat_reconstruction.in_resource(self.label)
+        self.id = int(self.pyxnat_resource.id())
+        self._files = None
         return
+
+    def __repr__(self):
+        return '<Input resource %s for Reconstruction %s>' % (self.label, self.reconstruction.id)
+
+class _ReconstructionOutResource(_BaseReconstructionResource):
+
+    def __init__(self, reconstruction, label):
+        self.reconstruction = reconstruction
+        self.experiment = reconstruction.experiment
+        self.subject = reconstruction.subject
+        self.project = reconstruction.project
+        self.connection = reconstruction.connection
+        self.label = label
+        self.pyxnat_resource = self.reconstruction.pyxnat_reconstruction.out_resource(self.label)
+        self.id = int(self.pyxnat_resource.id())
+        self._files = None
+        return
+
+    def __repr__(self):
+        return '<Output resource %s for Reconstruction %s>' % (self.label, self.reconstruction.id)
+
+class _BaseAssessmentResource(_BaseResource):
+
+    @property
+    def files(self):
+        if self._files is None:
+            self._files = {}
+            for f in self.pyxnat_resource.files():
+                path = f.attributes()['path']
+                self._files[path] = _File(self, self, path)
+        return self._files
+
+class _AssessmentInResource(_BaseAssessmentResource):
+
+    def __init__(self, assessment, label):
+        self.assessment = assessment
+        self.experiment = assessment.experiment
+        self.subject = assessment.subject
+        self.project = assessment.project
+        self.connection = assessment.connection
+        self.label = label
+        self.pyxnat_resource = self.assessment.pyxnat_assessment.in_resource(self.label)
+        self.id = int(self.pyxnat_resource.id())
+        self._files = None
+        return
+
+    def __repr__(self):
+        return '<Input resource %s for Assessment %s>' % (self.label, self.assessment.id)
+
+class _AssessmentOutResource(_BaseAssessmentResource):
+
+    def __init__(self, assessment, label):
+        self.assessment = assessment
+        self.experiment = assessment.experiment
+        self.subject = assessment.subject
+        self.project = assessment.project
+        self.connection = assessment.connection
+        self.label = label
+        self.pyxnat_resource = self.assessment.pyxnat_assessment.out_resource(self.label)
+        self.id = int(self.pyxnat_resource.id())
+        self._files = None
+        return
+
+
+    def __repr__(self):
+        return '<Output resource %s for Assessment %s>' % (self.label, self.assessment.id)
 
 class _File(object):
 
