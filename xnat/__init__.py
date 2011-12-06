@@ -729,6 +729,13 @@ class _Workflow(object):
         self._reset()
         return
 
+    def _remove_workflow_node_attribute(self, attr_name):
+        try:
+            self.workflow_node.removeAttribute(attr_name)
+        except xml.dom.NotFoundErr:
+            pass
+        return
+
     @property
     def xml(self):
         if self._xml is None:
@@ -785,10 +792,7 @@ class _Workflow(object):
     @step_launch_time.setter
     def step_launch_time(self, value):
         if value is None:
-            try:
-                self.workflow_node.removeAttribute('current_step_launch_time')
-            except xml.dom.NotFoundErr:
-                pass
+            self._remove_workflow_node_attribute('current_step_launch_time')
         elif not isinstance(value, datetime.datetime):
             raise TypeError, 'step_launch_time must be a dateime.datetime instance or None'
         if value is not None:
@@ -803,10 +807,7 @@ class _Workflow(object):
     @step_id.setter
     def step_id(self, value):
         if value is None:
-            try:
-                self.workflow_node.removeAttribute('current_step_id')
-            except xml.dom.NotFoundErr:
-                pass
+            self._remove_workflow_node_attribute('current_step_id')
         elif not isinstance(value, basestring):
             raise TypeError, 'step_id must be a string or None'
         if value is not None:
@@ -821,10 +822,7 @@ class _Workflow(object):
     @step_description.setter
     def step_description(self, value):
         if value is None:
-            try:
-                self.workflow_node.removeAttribute('step_description')
-            except xml.dom.NotFoundErr:
-                pass
+            self._remove_workflow_node_attribute('step_description')
         elif not isinstance(value, basestring):
             raise TypeError, 'step_description must be a string or None'
         if value is not None:
@@ -842,10 +840,7 @@ class _Workflow(object):
     @percent_complete.setter
     def percent_complete(self, value):
         if value is None:
-            try:
-                self.workflow_node.removeAttribute('percentageComplete')
-            except xml.dom.NotFoundErr:
-                pass
+            self._remove_workflow_node_attribute('percentageComplete')
         elif not isinstance(value, (int, float)):
             raise TypeError, 'percent_complete must be an int or float or None'
         if value is not None:
@@ -855,24 +850,15 @@ class _Workflow(object):
 
     def update(self, step_id, step_description, percent_complete):
         if step_id is None:
-            try:
-                self.workflow_node.removeAttribute('current_step_id')
-            except xml.dom.NotFoundErr:
-                pass
+            self._remove_workflow_node_attribute('current_step_id')
         elif not isinstance(step_id, basestring):
             raise TypeError, 'step_id must be a string or None'
         if step_description is None:
-            try:
-                self.workflow_node.removeAttribute('step_description')
-            except xml.dom.NotFoundErr:
-                pass
+            self._remove_workflow_node_attribute('step_description')
         elif not isinstance(step_description, basestring):
             raise TypeError, 'step_description must be a string or None'
         if percent_complete is None:
-            try:
-                self.workflow_node.removeAttribute('percentageComplete')
-            except xml.dom.NotFoundErr:
-                pass
+            self._remove_workflow_node_attribute('percentageComplete')
         elif not isinstance(percent_complete, (int, float)):
             raise TypeError, 'percent_complete must be an int or float or None'
         if step_id is not None:
@@ -892,19 +878,13 @@ class _Workflow(object):
         self.workflow_node.setAttribute('status', 'Complete')
         self.workflow_node.setAttribute('current_step_launch_time', t)
         self.workflow_node.setAttribute('percentageComplete', '100.0')
-        for attr_name in ('current_step_id', 'step_description'):
-            try:
-                self.workflow_node.removeAttribute(attr_name)
-            except xml.dom.NotFoundErr:
-                pass
+        self._remove_workflow_node_attribute('current_step_id')
+        self._remove_workflow_node_attribute('step_description')
         self._update_xnat()
 
     def fail(self, step_description=None):
         if step_description is None:
-            try:
-                self.workflow_node.removeAttribute('step_description')
-            except xml.dom.NotFoundErr:
-                pass
+            self._remove_workflow_node_attribute('step_description')
         elif not isinstance(step_description, basestring):
             raise TypeError, 'step_description must be a string or None'
         if step_description is not None:
