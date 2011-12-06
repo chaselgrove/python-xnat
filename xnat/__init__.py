@@ -696,7 +696,7 @@ class _File(object):
 
     @property
     def last_modified(self):
-        return self.pyxnat_file.last_modified()
+        return dateutil.parser.parse(self.pyxnat_file.last_modified())
 
     def read(self):
         fname = self.pyxnat_file.get()

@@ -1,3 +1,4 @@
+import dateutil.parser
 import pyxnat.core.resources
 from .. import Connection
 
@@ -19,7 +20,7 @@ def test_attributes():
     assert isinstance(file.pyxnat_file, pyxnat.core.resources.File)
     assert file.path == 'OAS1_0054_MR1_mpr-1_anon.hdr'
     assert file.size == 348
-    assert file.last_modified == 'Thu, 13 Jul 2006 14:20:07 GMT'
+    assert file.last_modified == dateutil.parser.parse('Thu, 13 Jul 2006 14:20:07 GMT')
 
 def test_data():
     data = file.read()
