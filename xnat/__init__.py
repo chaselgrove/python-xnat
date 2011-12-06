@@ -792,7 +792,7 @@ class _Workflow(object):
         elif isinstance(value, datetime.datetime):
             self.workflow_node.setAttribute('current_step_launch_time', value.strftime('%Y-%m-%dT%H:%M:%S'))
         else:
-            raise TypeError, 'step_launch_time must be a dateime.datetime instance'
+            raise TypeError, 'step_launch_time must be a dateime.datetime instance or None'
         self._update_xnat()
         return
 
@@ -810,7 +810,7 @@ class _Workflow(object):
         elif isinstance(value, basestring):
             self.workflow_node.setAttribute('current_step_id', value)
         else:
-            raise TypeError, 'step_id must be a string'
+            raise TypeError, 'step_id must be a string or None'
         self._update_xnat()
         return
 
@@ -849,7 +849,67 @@ class _Workflow(object):
         elif isinstance(value, (int, float)):
             self.workflow_node.setAttribute('percentageComplete', str(value))
         else:
-            raise TypeError, 'percent_complete must be an int or float'
+            raise TypeError, 'percent_complete must be an int or float or None'
+        self._update_xnat()
+        return
+
+    def update(self, step_id, step_description, percent_complete):
+        if step_id is None:
+            try:
+                self.workflow_node.removeAttribute('current_step_id')
+            except xml.dom.NotFoundErr:
+                pass
+        elif isinstance(step_id, basestring):
+            self.workflow_node.setAttribute('current_step_id', step_id)
+        else:
+            raise TypeError, 'step_id must be a string or None'
+        if step_description is None:
+            try:
+                self.workflow_node.removeAttribute('step_description')
+            except xml.dom.NotFoundErr:
+                pass
+        elif isinstance(step_description, basestring):
+            self.workflow_node.setAttribute('step_description', step_description)
+        else:
+            raise TypeError, 'step_description must be a string or None'
+        if percent_complete is None:
+            try:
+                self.workflow_node.removeAttribute('percentageComplete')
+            except xml.dom.NotFoundErr:
+                pass
+        elif isinstance(percent_complete, (int, float)):
+            self.workflow_node.setAttribute('percentageComplete', str(percent_complete))
+        else:
+            raise TypeError, 'percent_complete must be an int or float or None'
+        t = datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
+        self.workflow_node.setAttribute('status', 'Running')
+        self.workflow_node.setAttribute('current_step_launch_time', t)
+        self._update_xnat()
+        return
+
+    def complete(self):
+        t = datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
+        self.workflow_node.setAttribute('status', 'Complete')
+        self.workflow_node.setAttribute('current_step_launch_time', t)
+        self.workflow_node.setAttribute('percentageComplete', '100.0')
+        for attr_name in ('current_step_id', 'step_description'):
+            try:
+                self.workflow_node.removeAttribute(attr_name)
+            except xml.dom.NotFoundErr:
+                pass
+        self._update_xnat()
+
+    def fail(self, step_description=None):
+        if step_description is None:
+            try:
+                self.workflow_node.removeAttribute('step_description')
+            except xml.dom.NotFoundErr:
+                pass
+        elif isinstance(step_description, basestring):
+            self.workflow_node.setAttribute('step_description', step_description)
+        else:
+            raise TypeError, 'step_description must be a string or None'
+        self.workflow_node.setAttribute('status', 'Failed')
         self._update_xnat()
         return
 

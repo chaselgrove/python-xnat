@@ -1,3 +1,4 @@
+import time
 import datetime
 import nose.tools
 from .. import Connection
@@ -100,6 +101,52 @@ def test_step_launch_time():
     w2._reset()
     assert w2.step_launch_time is None
     nose.tools.assert_raises(TypeError, set_bad_step_launch_time)
+
+def test_update():
+    t0 = datetime.datetime.now()
+    time.sleep(1)
+    w1.update('step id', 'step description', 50)
+    time.sleep(1)
+    t1 = datetime.datetime.now()
+    assert w1.step_id == 'step id'
+    assert w1.step_description == 'step description'
+    assert w1.percent_complete == 50.0
+    assert w1.step_launch_time > t0
+    assert w1.step_launch_time < t1
+
+def test_fail():
+    w1.fail('failure message')
+    assert w1.status == 'Failed'
+    assert w1.step_description == 'failure message'
+    w2._reset()
+    assert w2.status == 'Failed'
+    assert w2.step_description == 'failure message'
+    w1.fail()
+    assert w1.status == 'Failed'
+    assert w1.step_description is None
+    w2._reset()
+    assert w2.status == 'Failed'
+    assert w2.step_description is None
+
+def test_complete():
+    t0 = datetime.datetime.now()
+    time.sleep(1)
+    w1.complete()
+    time.sleep(1)
+    t1 = datetime.datetime.now()
+    assert w1.status == 'Complete'
+    assert w1.step_launch_time > t0
+    assert w1.step_launch_time < t1
+    assert w1.percent_complete == 100.0
+    assert w1.step_id is None
+    assert w1.step_description is None
+    w2._reset()
+    assert w2.status == 'Complete'
+    assert w2.step_launch_time > t0
+    assert w2.step_launch_time < t1
+    assert w2.percent_complete == 100.0
+    assert w2.step_id is None
+    assert w2.step_description is None
 
 def teardown():
     c1.close()
