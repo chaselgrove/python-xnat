@@ -1,4 +1,7 @@
 import os
+import datetime
+import xml.dom.minidom
+import dateutil.parser
 try:
     import suds
 except ImportError:
@@ -87,7 +90,12 @@ class _BaseConnection(object):
             if isinstance(h, HTTPSudsPreprocessor):
                 h.jsessionid = self._jsessionid
         ws_url = '%s/axis/%s' % (self.uri, jws)
-        client = suds.client.Client('%s?wsdl' % ws_url, transport=t)
+        xsd_url = 'http://schemas.xmlsoap.org/soap/encoding/'
+        imp = suds.xsd.doctor.Import(xsd_url)
+        doctor = suds.xsd.doctor.ImportDoctor(imp)
+        client = suds.client.Client('%s?wsdl' % ws_url,
+                                    transport=t,
+                                    doctor=doctor)
         client.add_prefix('se', 'http://schemas.xmlsoap.org/soap/encoding/')
         typed_inputs = []
         for var in inputs:
@@ -95,11 +103,18 @@ class _BaseConnection(object):
                 ti = client.factory.create('se:string')
                 ti.value = var
                 typed_inputs.append(ti)
+            elif isinstance(var, bool):
+                ti = client.factory.create('se:boolean')
+                ti.value = var
+                typed_inputs.append(ti)
             else:
                 raise TypeError, 'unsupported type for variable'
         client.set_options(location=ws_url)
         f = getattr(client.service, operation)
-        return f(*typed_inputs)
+        rv = f(*typed_inputs)
+        # reset the pyxnat cache in case this is a write operation
+        self.pyxnat_interface._memcache = {}
+        return rv
 
 class Connection(_BaseConnection):
 
@@ -691,7 +706,151 @@ class _Workflow(object):
 
     def __init__(self, experiment, id):
         self.experiment = experiment
+        self.subject = experiment.subject
+        self.project = experiment.project
+        self.connection = experiment.connection
         self.id = id
+        self._reset()
+        return
+
+    def _reset(self):
+        "reset the object's cache to force synchronization with XNAT"
+        self._xml = None
+        self._doc = None
+        self._workflow_node = None
+        return
+
+    def _update_xnat(self):
+        inputs = (self.connection._jsessionid, 
+                  self.doc.toxml(), 
+                  False, 
+                  True)
+        self.connection._soap_call('StoreXML.jws', 'store', inputs)
+        self._reset()
+        return
+
+    @property
+    def xml(self):
+        if self._xml is None:
+            uri = '/app/template/XMLSearch.vm/id/%d/data_type/wrk:workflowData' % self.id
+            self._xml = self.connection.pyxnat_interface._exec(uri)
+        return self._xml
+
+    @property
+    def doc(self):
+        if self._doc is None:
+            self._doc = xml.dom.minidom.parseString(self.xml)
+        return self._doc
+
+    @property
+    def workflow_node(self):
+        if self._workflow_node is None:
+            self._workflow_node = self.doc.getElementsByTagName('wrk:Workflow')[0]
+        return self._workflow_node
+
+    def _attribute_or_none(self, attribute_name):
+        val = self.workflow_node.getAttribute(attribute_name)
+        if not val:
+            return None
+        return val
+
+    @property
+    def pipeline_name(self):
+        return self.workflow_node.getAttribute('pipeline_name')
+
+    @property
+    def launch_time(self):
+        s_val = self.workflow_node.getAttribute('launch_time')
+        return dateutil.parser.parse(s_val)
+
+    @property
+    def status(self):
+        return self.workflow_node.getAttribute('status')
+
+    @status.setter
+    def status(self, value):
+        if not isinstance(value, basestring):
+            raise TypeError, 'status must be a string'
+        self.workflow_node.setAttribute('status', value)
+        self._update_xnat()
+        return
+
+    @property
+    def step_launch_time(self):
+        s_val = self.workflow_node.getAttribute('current_step_launch_time')
+        if not s_val:
+            return None
+        return dateutil.parser.parse(s_val)
+
+    @step_launch_time.setter
+    def step_launch_time(self, value):
+        if value is None:
+            try:
+                self.workflow_node.removeAttribute('current_step_launch_time')
+            except xml.dom.NotFoundErr:
+                pass
+        elif isinstance(value, datetime.datetime):
+            self.workflow_node.setAttribute('current_step_launch_time', value.strftime('%Y-%m-%dT%H:%M:%S'))
+        else:
+            raise TypeError, 'step_launch_time must be a dateime.datetime instance'
+        self._update_xnat()
+        return
+
+    @property
+    def step_id(self):
+        return self._attribute_or_none('current_step_id')
+
+    @step_id.setter
+    def step_id(self, value):
+        if value is None:
+            try:
+                self.workflow_node.removeAttribute('current_step_id')
+            except xml.dom.NotFoundErr:
+                pass
+        elif isinstance(value, basestring):
+            self.workflow_node.setAttribute('current_step_id', value)
+        else:
+            raise TypeError, 'step_id must be a string'
+        self._update_xnat()
+        return
+
+    @property
+    def step_description(self):
+        return self._attribute_or_none('step_description')
+
+    @step_description.setter
+    def step_description(self, value):
+        if value is None:
+            try:
+                self.workflow_node.removeAttribute('step_description')
+            except xml.dom.NotFoundErr:
+                pass
+        elif isinstance(value, basestring):
+            self.workflow_node.setAttribute('step_description', value)
+        else:
+            raise TypeError, 'step_description must be a string or None'
+        self._update_xnat()
+        return
+
+    @property
+    def percent_complete(self):
+        s_val = self.workflow_node.getAttribute('percentageComplete')
+        if not s_val:
+            return None
+        return float(s_val)
+
+    @percent_complete.setter
+    def percent_complete(self, value):
+        if value is None:
+            try:
+                self.workflow_node.removeAttribute('percentageComplete')
+            except xml.dom.NotFoundErr:
+                pass
+        elif isinstance(value, (int, float)):
+            self.workflow_node.setAttribute('percentageComplete', str(value))
+        else:
+            raise TypeError, 'percent_complete must be an int or float'
+        self._update_xnat()
         return
 
 # eof
