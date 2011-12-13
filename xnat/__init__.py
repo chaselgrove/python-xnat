@@ -571,7 +571,7 @@ class _ScanResource(_BaseResource):
         return
 
     def __repr__(self):
-        return '<Resource %s for Scan %s>' % (self.label, self.scan.label)
+        return '<Resource %s for Scan %s>' % (self.label, self.scan.id)
 
     @property
     def _primary_resource(self):
