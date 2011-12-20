@@ -73,6 +73,19 @@ class _BaseConnection(object):
                 self._projects[project_id] = _Project(self, project_id)
         return self._projects
 
+    def find_subject(self, subject_id):
+        for s in self.pyxnat_interface.select.projects().subjects(subject_id):
+            if s.id() != subject_id:
+                continue
+            primary_project = s.attrs.get('project')
+            return self.projects[primary_project].subjects[subject_id]
+        raise ValueError
+
+#    def find_experiment(self, experiment_id):
+#        for e in self.pyxnat_interface.select.projects().subjects().experiments(experiment_id):
+#            pass
+#        raise ValueError
+
     @property
     def _jsessionid(self):
         self._check_connected()
