@@ -33,6 +33,12 @@ def test_experiments():
     # ID of the same experiment
     assert 'OAS1_0054_MR1' not in s.experiments
     assert isinstance(s.experiments['Human_Buckner_Case01'], _Experiment)
+    assert isinstance(s.experiments_by_id, dict)
+    assert 'OAS1_0054_MR1' in s.experiments_by_id
+    assert 'Human_Buckner_Case01' not in s.experiments_by_id
+    assert isinstance(s.experiments_by_id['OAS1_0054_MR1'], _Experiment)
+    s.experiments_by_id['OAS1_0054_MR1'].id == 'OAS1_0054_MR1'
+    s.experiments_by_id['OAS1_0054_MR1'].label == 'Human_Buckner_Case01'
 
 def teardown():
     c.close()

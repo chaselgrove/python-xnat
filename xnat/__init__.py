@@ -274,6 +274,15 @@ class _Subject(object):
     def xml(self):
         return self.pyxnat_subject.get()
 
+    def _set_experiments(self):
+        self._experiments = {}
+        self._experiments_by_id = {}
+        for e in self.pyxnat_subject.experiments():
+            label = e.label()
+            self._experiments[label] = _Experiment(self, label)
+            self._experiments_by_id[e.id()] = _Experiment(self, label)
+        return
+
     @property
     def projects(self):
         if self._projects is None:
@@ -289,10 +298,14 @@ class _Subject(object):
     @property
     def experiments(self):
         if self._experiments is None:
-            self._experiments = {}
-            for label in self.pyxnat_subject.experiments().get('label'):
-                self._experiments[label] = _Experiment(self, label)
+            self._set_experiments()
         return self._experiments
+
+    @property
+    def experiments_by_id(self):
+        if self._experiments_by_id is None:
+            self._set_experiments()
+        return self._experiments_by_id
 
     @property
     def resources(self):
