@@ -74,12 +74,13 @@ class _BaseConnection(object):
         return self._projects
 
     def find_subject(self, subject_id):
-        for s in self.pyxnat_interface.select.projects().subjects(subject_id):
-            if s.id() != subject_id:
-                continue
-            primary_project = s.attrs.get('project')
-            return self.projects[primary_project].subjects[subject_id]
-        raise ValueError
+        cols =  ['xnat:subjectData/PROJECT']
+        constraints = [('xnat:subjectData/SUBJECT_ID', '=', subject_id)]
+        res = self.pyxnat_interface.select('xnat:subjectData', cols).where(constraints)
+        if len(res) == 0:
+            raise ValueError
+        project = self.projects[res[0]['project']]
+        return project.subjects_by_id[subject_id]
 
 #    def find_experiment(self, experiment_id):
 #        for e in self.pyxnat_interface.select.projects().subjects().experiments(experiment_id):
@@ -197,6 +198,7 @@ class _Project(object):
         self._pyxnat_project = None
         self._attributes = None
         self._subjects = None
+        self._subjects_by_id = None
         self._resources = None
         return
 
@@ -271,6 +273,7 @@ class _Subject(object):
         self.project = project
         self._projects = None
         self._experiments = None
+        self._experiments_by_id = None
         self.label = label
         self.pyxnat_subject = self.project.pyxnat_project.subject(self.label)
         self.id = self.pyxnat_subject.id()
