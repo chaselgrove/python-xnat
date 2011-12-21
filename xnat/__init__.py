@@ -378,8 +378,8 @@ class _Experiment(object):
     def assessments(self):
         if self._assessments is None:
             self._assessments = {}
-            for id in self.pyxnat_experiment.assessors().get('label'):
-                self._assessments[id] = _Assessment(self, id)
+            for label in self.pyxnat_experiment.assessors().get('label'):
+                self._assessments[label] = _Assessment(self, label)
         return self._assessments
 
     @property
@@ -479,13 +479,14 @@ class _Reconstruction(object):
 
 class _Assessment(object):
 
-    def __init__(self, experiment, id):
+    def __init__(self, experiment, label):
         self.experiment = experiment
         self.subject = self.experiment.subject
         self.project = self.subject.project
         self.connection = self.project.connection
-        self.id = id
-        self.pyxnat_assessment = self.experiment.pyxnat_experiment.assessor(self.id)
+        self.label = label
+        self.pyxnat_assessment = self.experiment.pyxnat_experiment.assessor(self.label)
+        self.id = self.pyxnat_assessment.id()
         self._in_resources = None
         self._out_resources = None
         return

@@ -16,6 +16,7 @@ def test_attributes():
     assert assessment.project is project
     assert assessment.subject is subject
     assert assessment.experiment is experiment
+    assert assessment.label == 'OAS1_0054_MR1_ASEG'
     assert assessment.id == 'OAS1_0054_MR1_ASEG'
     assert isinstance(assessment.pyxnat_assessment, pyxnat.core.resources.Assessor)
     assert isinstance(assessment.xml, str)
