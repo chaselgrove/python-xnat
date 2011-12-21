@@ -75,7 +75,7 @@ class _BaseConnection(object):
 
     def find_subject(self, subject_id):
         cols =  ['xnat:subjectData/PROJECT']
-        constraints = [('xnat:subjectData/SUBJECT_ID', '=', subject_id)]
+        constraints = [('xnat:subjectData/ID', '=', subject_id)]
         res = self.pyxnat_interface.select('xnat:subjectData', cols).where(constraints)
         if len(res) == 0:
             raise ValueError
