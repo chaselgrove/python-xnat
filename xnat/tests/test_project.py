@@ -17,7 +17,6 @@ def test_attributes():
     assert p.name == name
     assert p.description == description
     assert p.secondary_id == secondary_id
-    assert isinstance(p.pyxnat_project, pyxnat.core.resources.Project)
     assert isinstance(p.xml, str)
     assert p.xml.startswith('<?xml version="1.0" encoding="UTF-8"?>')
     assert p.xml.endswith('</xnat:Project>\n')
