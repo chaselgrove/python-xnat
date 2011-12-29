@@ -193,8 +193,8 @@ class AnonymousConnection(_BaseConnection):
 class _Project(object):
 
     def __init__(self, connection, id):
-        self.id = id
-        self.connection = connection
+        self._id = id
+        self._connection = connection
         self._pyxnat_project = None
         self._attributes = None
         self._subjects = None
@@ -221,6 +221,14 @@ class _Project(object):
             self._subjects[label] = _Subject(self, label)
             self._subjects_by_id[s.id()] = _Subject(self, label)
         return
+
+    @property
+    def id(self):
+        return self._id
+
+    @property
+    def connection(self):
+        return self._connection
 
     @property
     def pyxnat_project(self):

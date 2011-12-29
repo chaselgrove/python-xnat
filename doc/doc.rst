@@ -47,34 +47,34 @@ Project Objects
 
 Project objects should not be instantiated directly, but should be accessed through the projects attribute of a connection object.
 
-id
+id (read only)
     The project ID.
 
-connection
+connection (read only)
     The connection object for this project.
 
-pyxnat_project
+pyxnat_project (read only)
     The pyxnat Project object for this project.
 
-name
+name (read only)
     The project name.
 
-description
+description (read only)
     The project description.
 
-secondary_id
+secondary_id (read only)
     The project secondary ID.
 
-xml
+xml (read only)
     The XML for the project.
 
-subjects
+subjects (read only)
     A dictionary of subjects in the project.  Keys are the subject labels.
 
-subjects_by_id
+subjects_by_id (read only)
     A dictionary of subjects in the project.  Keys are the subject IDs.
 
-resources
+resources (read only)
     A dictionary of project resources.  Keys are resource labels.
 
 Subject Objects

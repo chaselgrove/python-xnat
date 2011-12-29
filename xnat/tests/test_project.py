@@ -2,10 +2,41 @@ import nose.tools
 import pyxnat.core.resources
 from .. import Connection, _Subject
 
+def set_p2_id():
+    p2.id = ''
+
+def set_p2_connection():
+    p2.connection = ''
+
+def set_p2_pyxnat_project():
+    p2.pyxnat_project = ''
+
+def set_p2_name():
+    p2.name = ''
+
+def set_p2_description():
+    p2.description = ''
+
+def set_p2_secondary_id():
+    p2.secondary_id = ''
+
+def set_p2_xml():
+    p2.xml = ''
+
+def set_p2_subjects():
+    p2.subjects = ''
+
+def set_p2_subjects_by_id():
+    p2.subjects_by_id = ''
+
+def set_p2_resources():
+    p2.resources = ''
+
 def setup():
-    global c, p, description, name, secondary_id
+    global c, p, p2, description, name, secondary_id
     c = Connection('https://central.xnat.org', 'nosetests', 'nosetests')
     p = c.projects['CENTRAL_OASIS_LONG']
+    p2 = c.projects['nosetests2']
     description = p.pyxnat_project.attrs.get('description')
     name = p.pyxnat_project.attrs.get('name')
     secondary_id = p.pyxnat_project.attrs.get('secondary_ID')
@@ -20,6 +51,18 @@ def test_attributes():
     assert isinstance(p.xml, str)
     assert p.xml.startswith('<?xml version="1.0" encoding="UTF-8"?>')
     assert p.xml.endswith('</xnat:Project>\n')
+
+def test_read_only():
+    nose.tools.assert_raises(AttributeError, set_p2_id)
+    nose.tools.assert_raises(AttributeError, set_p2_connection)
+    nose.tools.assert_raises(AttributeError, set_p2_pyxnat_project)
+    nose.tools.assert_raises(AttributeError, set_p2_name)
+    nose.tools.assert_raises(AttributeError, set_p2_description)
+    nose.tools.assert_raises(AttributeError, set_p2_secondary_id)
+    nose.tools.assert_raises(AttributeError, set_p2_xml)
+    nose.tools.assert_raises(AttributeError, set_p2_subjects)
+    nose.tools.assert_raises(AttributeError, set_p2_subjects_by_id)
+    nose.tools.assert_raises(AttributeError, set_p2_resources)
 
 def test_subjects():
     assert isinstance(p.subjects, dict)
