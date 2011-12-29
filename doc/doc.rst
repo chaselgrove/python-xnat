@@ -77,6 +77,9 @@ subjects_by_id (read only)
 resources (read only)
     A dictionary of project resources.  Keys are resource labels.
 
+create_subject(label)
+    Create a subject with the given label.  If the subject exists, raises ValueError.
+
 Subject Objects
 ---------------
 

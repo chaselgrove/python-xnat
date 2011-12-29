@@ -222,6 +222,16 @@ class _Project(object):
             self._subjects_by_id[s.id()] = _Subject(self, label)
         return
 
+    def create_subject(self, label):
+        pyxnat_subject = self.pyxnat_project.subject(label)
+        if pyxnat_subject.exists():
+            raise ValueError, 'subject %s exists for project %s' % (label, self.id)
+        pyxnat_subject.create()
+        assert pyxnat_subject.exists()
+        self._subjects = None
+        self._subjects_by_id = None
+        return self.subjects[label]
+
     @property
     def id(self):
         return self._id

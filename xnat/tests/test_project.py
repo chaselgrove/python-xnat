@@ -1,3 +1,4 @@
+import uuid
 import nose.tools
 import pyxnat.core.resources
 from .. import Connection, _Subject
@@ -33,13 +34,14 @@ def set_p2_resources():
     p2.resources = ''
 
 def setup():
-    global c, p, p2, description, name, secondary_id
+    global c, p, p2, description, name, secondary_id, new_subject_label
     c = Connection('https://central.xnat.org', 'nosetests', 'nosetests')
     p = c.projects['CENTRAL_OASIS_LONG']
     p2 = c.projects['nosetests2']
     description = p.pyxnat_project.attrs.get('description')
     name = p.pyxnat_project.attrs.get('name')
     secondary_id = p.pyxnat_project.attrs.get('secondary_ID')
+    new_subject_label = uuid.uuid1().hex
 
 def test_attributes():
     assert p.id == 'CENTRAL_OASIS_LONG'
@@ -77,6 +79,14 @@ def test_subjects():
     assert isinstance(p.subjects_by_id['CENTRAL_S00088'], _Subject)
     assert p.subjects_by_id['CENTRAL_S00088'].id == 'CENTRAL_S00088'
     assert p.subjects_by_id['CENTRAL_S00088'].label == 'OAS2_0010'
+
+def test_create_subject():
+    assert new_subject_label not in p2.subjects
+    new_subject = p2.create_subject(new_subject_label)
+    assert isinstance(new_subject, _Subject)
+    assert new_subject.label == new_subject_label
+    nose.tools.assert_raises(ValueError, lambda: p2.create_subject(new_subject_label))
+    new_subject.pyxnat_subject.delete()
 
 def teardown():
     c.close()
