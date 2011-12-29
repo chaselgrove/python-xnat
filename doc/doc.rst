@@ -206,13 +206,28 @@ Scan Objects
 Scan objects should not be instantiated directly, but should be accessed using the scan attribute of experiment objects.
 
 connection
+    The connection object for the scan.
+
 project
+    The project object for the scan.
+
 subject
+    The subject object for the scan.
+
 experiment
+    The experiment object for the scan.
+
 id
+    The scan ID.
+
 pyxnat_scan
+    The pyxnat Scan object for the scan.
+
 xml
+    The XNAT XML for the scan.
+
 resources
+    A dictionary of resources for this scan.  Keys are resource labels.
 
 Reconstruction Objects
 ----------------------
@@ -220,14 +235,31 @@ Reconstruction Objects
 Reconstruction objects should not be instantiated directly, but should be accessed using the reconstruction attribute of experiment objects.
 
 connection
+    The connection object for this reconstruction.
+
 project
+    The project object for this reconstruction.
+
 subject
+    The subject object for this reconstruction.
+
 experiment
+    The experiment object for this reconstruction.
+
 id
+    The reconstruction ID.
+
 pyxnat_reconstruction
+    The pyxnat Reconstruction object for this reconstruction.
+
 xml
+    The XNAT XML for this reconstruction.
+
 in_resources
+    A dictionary of input resources for this reconstruction.  Keys are resource labels.
+
 out_resources
+    A dictionary of output resources for this reconstruction.  Keys are resource labels.
 
 Assessment Objects
 ------------------
@@ -235,37 +267,87 @@ Assessment Objects
 Assessment objects should not be instantiated directly, but should be accessed using the assessment attribute of experiment objects.
 
 connection
+    The connection object for this assessment.
+
 project
+    The project object for this assessment.
+
 subject
+    The subject object for this assessment.
+
 experiment
+    The experiment object for this assessment.
+
 id
-pyxnat_assessment
-xml
-in_resources
-out_resources
+    The assessment ID.
+
 label
+    The assessment label.
+
+pyxnat_assessment
+    The pyxnat Assessor object for this assessment.
+
+xml
+    The XNAT XML for this assessment.
+
+in_resources
+    A dictionary of input resources for this assessment.  Keys are resource labels.
+
+out_resources
+    A dictionary of output resources for this assessment.  Keys are resource labels.
 
 Workflow Objects
 ----------------
 
 Workflow objects should not be instantiated directly, but should be accessed using the workflows attribute of experiment objects.
 
-id (integer)
+id
+    The (integer) ID for the workflow.
+
 connection
+    The connection object for this workflow.
+
 project
+    The project object for this workflow.
+
 subject
+    The subject object for this workflow.
+
 experiment
+    The experiment object for this workflow.
+
 status
-step_launch_time datetime.datetime
+The workflow status (Queued, Running, etc)
+
+step_launch_time
+    The (datetime.datetime) time that the current step started.
+
 step_id
+    The workflow step ID.
+
 pipeline_name
+    The pipeline name.
+
 step_description
-launch_time datetime.datetime
-percent_complete (float)
+    The step description.
+
+launch_time
+    The (datetime.datetime) time that the pipeline started.
+
+percent_complete
+    The (float) percent complete.
+
 xml
+    The XNAT XML for the pipeline.
+
 update(step_id, step_description, percent_complete)
+    Update the workflow.  step_id and step_description must be strings, and percent_complete must be a float.  Status is set to Running and current_step_launch_time is updated.
+
 complete()
+    Mark the workflow successfully completed.  status is set to Complete, current_step_launch_time is updated, percent_complete is set to 100.0, and current_step_id and step_description are set to None (removed from the XNAT XML).
+
 fail([step_description])
+    Mark the workflow failed.  status is set to Failed.  If step_description is not given, step_description is set to None (removed from the XNAT XML).
 
 Resource Objects
 ----------------
@@ -273,16 +355,37 @@ Resource Objects
 Resource objects should not be instantiated directly, but should be accessed using the resources attributes of project, subject, experiment, and scan objects and the in_resources and out_resources attributes of reconstruction and assessment objects.
 
 connection
+    The connection object for the resource.
+
 project
+    The project object for the resource.
+
 subject
+    The subject object for the resource (if applicable).
+
 experiment
+    The experiment object for the resource (if applicable).
+
 assessment
+    The assessment object for the resource (if applicable).
+
 reconstruction
+    The reconstruction object for the resource (if applicable).
+
 scan
+    The scan object for the resource (if applicable).
+
 pyxnat_resource
-id (integer)
+    The pyxnat Resource object for the resource.
+
+id
+    The (integer) ID of the resource.
+
 label
+    The label of the resource.
+
 files
+    A list of File objects in the resource.
 
 File Objects
 ------------
@@ -290,9 +393,22 @@ File Objects
 File objects should not be instantiated directly but should be accessed through the files attributes of resource objects.
 
 connection
+    The connection object for this file.
+
 resource
+    The resource object for this file.
+
 pyxnat_file
+    The pyxnat File object for the file.
+
 path
+    The path of the file relative to the resource.
+
 size
-last_modified datetime.datetime
+    The size in bytes of the file.
+
+last_modified
+    The (datetime.datetime) time of last modification.
+
 read()
+    Return the contents of the file.
