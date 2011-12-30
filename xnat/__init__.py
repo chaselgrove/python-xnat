@@ -47,12 +47,12 @@ class _BaseConnection(object):
 
     def _check_connected(self):
         if not self.is_connected():
-            raise NotConnectedError
+            raise NotConnectedError()
         return
 
     def _check_suds(self):
         if suds is None:
-            raise ImportError, 'Module suds not found'
+            raise ImportError('Module suds not found')
         return
 
     def is_connected(self):
@@ -81,14 +81,14 @@ class _BaseConnection(object):
         constraints = [('xnat:subjectData/ID', '=', subject_id)]
         res = self.pyxnat_interface.select('xnat:subjectData', cols).where(constraints)
         if len(res) == 0:
-            raise ValueError
+            raise ValueError()
         project = self.projects[res[0]['project']]
         return project.subjects_by_id[subject_id]
 
 #    def find_experiment(self, experiment_id):
 #        for e in self.pyxnat_interface.select.projects().subjects().experiments(experiment_id):
 #            pass
-#        raise ValueError
+#        raise ValueError()
 
     @property
     def _jsessionid(self):
@@ -125,7 +125,7 @@ class _BaseConnection(object):
                 ti.value = var
                 typed_inputs.append(ti)
             else:
-                raise TypeError, 'unsupported type for variable'
+                raise TypeError('unsupported type for variable')
         client.set_options(location=ws_url)
         f = getattr(client.service, operation)
         rv = f(*typed_inputs)
@@ -227,10 +227,10 @@ class _Project(object):
 
     def create_subject(self, label):
         if not self.pyxnat_project.exists():
-            raise DoesNotExistError, 'Project %s does not exist' % self.id
+            raise DoesNotExistError('Project %s does not exist' % self.id)
         pyxnat_subject = self.pyxnat_project.subject(label)
         if pyxnat_subject.exists():
-            raise ValueError, 'subject %s exists for project %s' % (label, self.id)
+            raise ValueError('subject %s exists for project %s' % (label, self.id))
         pyxnat_subject.create()
         assert pyxnat_subject.exists()
         self._subjects = None
@@ -843,7 +843,7 @@ class _Workflow(object):
     @status.setter
     def status(self, value):
         if not isinstance(value, basestring):
-            raise TypeError, 'status must be a string'
+            raise TypeError('status must be a string')
         self.workflow_node.setAttribute('status', value)
         self._update_xnat()
         return
@@ -860,7 +860,7 @@ class _Workflow(object):
         if value is None:
             self._remove_workflow_node_attribute('current_step_launch_time')
         elif not isinstance(value, datetime.datetime):
-            raise TypeError, 'step_launch_time must be a dateime.datetime instance or None'
+            raise TypeError('step_launch_time must be a dateime.datetime instance or None')
         if value is not None:
             self.workflow_node.setAttribute('current_step_launch_time', value.strftime('%Y-%m-%dT%H:%M:%S'))
         self._update_xnat()
@@ -875,7 +875,7 @@ class _Workflow(object):
         if value is None:
             self._remove_workflow_node_attribute('current_step_id')
         elif not isinstance(value, basestring):
-            raise TypeError, 'step_id must be a string or None'
+            raise TypeError('step_id must be a string or None')
         if value is not None:
             self.workflow_node.setAttribute('current_step_id', value)
         self._update_xnat()
@@ -890,7 +890,7 @@ class _Workflow(object):
         if value is None:
             self._remove_workflow_node_attribute('step_description')
         elif not isinstance(value, basestring):
-            raise TypeError, 'step_description must be a string or None'
+            raise TypeError('step_description must be a string or None')
         if value is not None:
             self.workflow_node.setAttribute('step_description', value)
         self._update_xnat()
@@ -908,7 +908,7 @@ class _Workflow(object):
         if value is None:
             self._remove_workflow_node_attribute('percentageComplete')
         elif not isinstance(value, (int, float)):
-            raise TypeError, 'percent_complete must be an int or float or None'
+            raise TypeError('percent_complete must be an int or float or None')
         if value is not None:
             self.workflow_node.setAttribute('percentageComplete', str(value))
         self._update_xnat()
@@ -918,15 +918,15 @@ class _Workflow(object):
         if step_id is None:
             self._remove_workflow_node_attribute('current_step_id')
         elif not isinstance(step_id, basestring):
-            raise TypeError, 'step_id must be a string or None'
+            raise TypeError('step_id must be a string or None')
         if step_description is None:
             self._remove_workflow_node_attribute('step_description')
         elif not isinstance(step_description, basestring):
-            raise TypeError, 'step_description must be a string or None'
+            raise TypeError('step_description must be a string or None')
         if percent_complete is None:
             self._remove_workflow_node_attribute('percentageComplete')
         elif not isinstance(percent_complete, (int, float)):
-            raise TypeError, 'percent_complete must be an int or float or None'
+            raise TypeError('percent_complete must be an int or float or None')
         if step_id is not None:
             self.workflow_node.setAttribute('current_step_id', step_id)
         if step_description is not None:
@@ -952,7 +952,7 @@ class _Workflow(object):
         if step_description is None:
             self._remove_workflow_node_attribute('step_description')
         elif not isinstance(step_description, basestring):
-            raise TypeError, 'step_description must be a string or None'
+            raise TypeError('step_description must be a string or None')
         if step_description is not None:
             self.workflow_node.setAttribute('step_description', step_description)
         self.workflow_node.setAttribute('status', 'Failed')
