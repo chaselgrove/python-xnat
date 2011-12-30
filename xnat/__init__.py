@@ -293,16 +293,16 @@ class _Project(object):
 class _Subject(object):
 
     def __init__(self, project, label):
-        self.project = project
+        self._project = project
         self._projects = None
         self._experiments = None
         self._experiments_by_id = None
-        self.label = label
-        self.pyxnat_subject = self.project.pyxnat_project.subject(self.label)
-        self.id = self.pyxnat_subject.id()
-        self.connection = self.project.connection
-        self.primary_project = self.connection.projects[self.pyxnat_subject.attrs.get('project')]
-        self.primary_label = self.primary_project.pyxnat_project.subject(self.id).label()
+        self._label = label
+        self._pyxnat_subject = self.project.pyxnat_project.subject(self.label)
+        self._id = self.pyxnat_subject.id()
+        self._connection = self.project.connection
+        self._primary_project = self.connection.projects[self.pyxnat_subject.attrs.get('project')]
+        self._primary_label = self.primary_project.pyxnat_project.subject(self.id).label()
         self._resources = None
         return
 
@@ -321,6 +321,34 @@ class _Subject(object):
             self._experiments[label] = _Experiment(self, label)
             self._experiments_by_id[e.id()] = _Experiment(self, label)
         return
+
+    @property
+    def project(self):
+        return self._project
+
+    @property
+    def label(self):
+        return self._label
+
+    @property
+    def pyxnat_subject(self):
+        return self._pyxnat_subject
+
+    @property
+    def id(self):
+        return self._id
+
+    @property
+    def connection(self):
+        return self._connection
+
+    @property
+    def primary_project(self):
+        return self._primary_project
+
+    @property
+    def primary_label(self):
+        return self._primary_label
 
     @property
     def projects(self):

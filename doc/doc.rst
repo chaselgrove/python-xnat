@@ -130,40 +130,40 @@ NameError: name 'secondary_subject' is not defined
 >>> shared_subject.projects
 [<Project CENTRAL_OASIS_CS>, <Project PALS>]
 
-connection
+connection (read only)
     The connection object for this subject.
 
-id
+id (read only)
     The subject ID.
 
-project
+project (read only)
     The project to which this subject belongs.
 
-label
+label (read only)
     The label for this subject in the parent project.
 
-pyxnat_subject
+pyxnat_subject (read only)
     The pyxnat Subject object for this subject.
 
-xml
+xml (read only)
     The XML for this subject.
 
-primary_project
+primary_project (read only)
     The subject's primary project.
 
-primary_label
+primary_label (read only)
     The subject's primary label (the label of the subject in its primary project).
 
-projects
+projects (read only)
     The list of projects this subject is in.
 
-experiments
+experiments (read only)
     A dictionary of experiments for the subject.  Keys are experiment labels.
 
-experiments_by_id
+experiments_by_id (read only)
     A dictionary of experiments for the subject.  Keys are experiment IDs.
 
-resources
+resources (read only)
     A dictionary of subject resources.  Keys are resource labels.
 
 Experiment Objects
