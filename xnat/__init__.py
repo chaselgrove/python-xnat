@@ -32,6 +32,9 @@ class XNATError(Exception):
 class NotConnectedError(XNATError):
     "not connected"
 
+class DoesNotExistError(XNATError):
+    "entity does not exist"
+
 class HTTPSudsPreprocessor(urllib2.BaseHandler):
 
     def http_request(self, req):
@@ -223,6 +226,8 @@ class _Project(object):
         return
 
     def create_subject(self, label):
+        if not self.pyxnat_project.exists():
+            raise DoesNotExistError, 'Project %s does not exist' % self.id
         pyxnat_subject = self.pyxnat_project.subject(label)
         if pyxnat_subject.exists():
             raise ValueError, 'subject %s exists for project %s' % (label, self.id)

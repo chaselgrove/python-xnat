@@ -10,6 +10,18 @@ The XNAT hierarchy can be navigated with this module in a manner analogous to th
 
 Debugging can be turned on by setting the environment variable PYTHON_XNAT_DEBUG.  Setting this variable to "pyxnat" will also turn on debugging in the underlying pyxnat module.
 
+Exceptions
+----------
+
+XNATError
+    Base class for XNAT exceptions.
+
+NotConnectedError
+    Not connected.
+
+DoesNotExistError
+    Entity does not exist.
+
 Connection Objects
 ------------------
 
@@ -78,7 +90,7 @@ resources (read only)
     A dictionary of project resources.  Keys are resource labels.
 
 create_subject(label)
-    Create a subject with the given label.  If the subject exists, raises ValueError.
+    Create a subject with the given label.  If the subject exists, raises ValueError.  If the project has been deleted, raises DoesNotExistError.
 
 Subject Objects
 ---------------
