@@ -85,10 +85,25 @@ class _BaseConnection(object):
         project = self.projects[res[0]['project']]
         return project.subjects_by_id[subject_id]
 
-#    def find_experiment(self, experiment_id):
-#        for e in self.pyxnat_interface.select.projects().subjects().experiments(experiment_id):
-#            pass
-#        raise ValueError()
+    def find_experiment(self, experiment_id):
+        # we use a hybrid approach here:
+        #     /data/experiments?ID=... will use XNAT's facility for finding 
+        #     an experiment; this will give us an empty list if it is not 
+        #     found (so we don't have to handle 404s)
+        # but this doesn't give us the subject, so:
+        #     pyxnat's resources.Experiment() on the URI returned in the 
+        #     above to get and parse the XML with the subject ID
+        entry_point = self.pyxnat_interface._get_entry_point()
+        uri = '%s/experiments?ID=%s' % (entry_point, experiment_id)
+        result = self.pyxnat_interface._get_json(uri)
+        if not result:
+            raise ValueError(experiment_id)
+        uri = result[0]['URI']
+        project = self.projects[result[0]['project']]
+        pyxnat_experiment = pyxnat.core.resources.Experiment(uri, self.pyxnat_interface)
+        subject_id = pyxnat_experiment.xpath('//xnat:subject_ID')[0].text
+        subject = project.subjects_by_id[subject_id]
+        return subject.experiments_by_id[experiment_id]
 
     @property
     def _jsessionid(self):

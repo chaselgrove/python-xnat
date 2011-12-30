@@ -53,6 +53,8 @@ projects
 find_subject(subject_id)
     Return a subject object given a subject ID.  Raises ValueError if the subject cannot be found.
 
+find_experiment(experiment_id)
+    Return an experiment given an experiment ID.  Raises ValueError if the experiment cannot be found.
 
 Project Objects
 ---------------
