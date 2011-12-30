@@ -1,4 +1,5 @@
 AnonymousConnection
+DoesNotExistError
 JSESSIONID
 NameError
 NotConnectedError
@@ -8,6 +9,7 @@ ValueError
 Workflow
 XNAT
 XNAT's
+XNATError
 datetime
 pyxnat
 stdin
