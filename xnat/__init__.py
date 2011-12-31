@@ -35,7 +35,7 @@ class NotConnectedError(XNATError):
 class DoesNotExistError(XNATError):
     "entity does not exist"
 
-class Dictionary:
+class _Dictionary:
 
     """ordered, immutable dictionary"""
 
@@ -51,6 +51,9 @@ class Dictionary:
 
     def __contains__(self, key):
         return key in self._dict
+
+    def __getitem__(self, key):
+        return self._dict[key]
 
     def __iter__(self):
         for key in self._keys:
@@ -125,9 +128,10 @@ class _BaseConnection(object):
     def projects(self):
         if self._projects is None:
             self._check_connected()
-            self._projects = {}
+            projects = []
             for project_id in self.pyxnat_interface.select.projects().get():
-                self._projects[project_id] = _Project(self, project_id)
+                projects.append((project_id, _Project(self, project_id)))
+            self._projects = _Dictionary(projects)
         return self._projects
 
     def find_subject(self, subject_id):
@@ -230,7 +234,6 @@ class Connection(_BaseConnection):
         # force a check of the authentication
         self.pyxnat_interface._get_entry_point()
         self._projects = None
-        self._subjects = {}
         return
 
     def __repr__(self):
@@ -254,7 +257,6 @@ class AnonymousConnection(_BaseConnection):
         # force a check of the authentication
         self.pyxnat_interface._get_entry_point()
         self._projects = None
-        self._subjects = {}
         return
 
     def __repr__(self):

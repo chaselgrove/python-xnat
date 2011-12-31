@@ -1,6 +1,6 @@
 import nose.tools
 import pyxnat.core.interfaces
-from .. import AnonymousConnection, NotConnectedError, _Project
+from .. import AnonymousConnection, NotConnectedError, _Project, _Dictionary
 
 def setup():
     global c
@@ -18,7 +18,7 @@ def test_attributes():
     nose.tools.assert_raises(AttributeError, lambda: c.password)
 
 def test_projects():
-    assert isinstance(c.projects, dict)
+    assert isinstance(c.projects, _Dictionary)
     assert 'CENTRAL_OASIS_CS' in c.projects
     assert isinstance(c.projects['CENTRAL_OASIS_CS'], _Project)
     assert 'xxxxxxxx' not in c.projects

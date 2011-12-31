@@ -2,7 +2,7 @@
 #def test_str():
 
 import nose.tools
-from .. import Dictionary
+from .. import _Dictionary
 
 t = ((1, 'z'), 
      (5, 'v'), 
@@ -16,9 +16,12 @@ def setitem(key):
 def delitem(key):
     del d[key]
 
+def getitem(key):
+    return d[key]
+
 def setup():
     global d
-    d = Dictionary(t)
+    d = _Dictionary(t)
 
 def test_contains():
     assert 1 in d
@@ -27,6 +30,10 @@ def test_contains():
 def test_delitem():
     nose.tools.assert_raises(AttributeError, lambda: delitem(1))
     nose.tools.assert_raises(AttributeError, lambda: delitem(6))
+
+def test_getitem():
+    assert d[1] == 'z'
+    nose.tools.assert_raises(KeyError, lambda: getitem(6))
 
 def test_iter():
     assert [ k for k in d ] == [1, 5, 3, 4, 2]
