@@ -35,6 +35,60 @@ class NotConnectedError(XNATError):
 class DoesNotExistError(XNATError):
     "entity does not exist"
 
+class Dictionary:
+
+    """ordered, immutable dictionary"""
+
+    def __init__(self, t):
+        self._keys = []
+        self._dict = {}
+        for (key, value) in t:
+            if key in self._keys:
+                self._keys.remove(key)
+            self._keys.append(key)
+            self._dict[key] = value
+        return
+
+    def __contains__(self, key):
+        return key in self._dict
+
+    def __iter__(self):
+        for key in self._keys:
+            yield key
+        return
+
+    def __len__(self):
+        return len(self._dict)
+
+#    def __repr__
+#    def __str__ -- not needed if repr is set --
+    def has_key(self, key):
+        return key in self._dict
+
+    def items(self):
+        return [ v for v in self.iteritems() ]
+
+    def iteritems(self):
+        for key in self:
+            yield (key, self._dict[key])
+        return
+
+    def iterkeys(self):
+        for key in self:
+            yield key
+        return
+
+    def keys(self):
+        return [ key for key in self ]
+
+    def itervalues(self):
+        for key in self:
+            yield self._dict[key]
+        return
+
+    def values(self):
+        return [ v for v in self.itervalues() ]
+
 class HTTPSudsPreprocessor(urllib2.BaseHandler):
 
     def http_request(self, req):
