@@ -1,7 +1,7 @@
 import uuid
 import nose.tools
 import pyxnat.core.resources
-from .. import Connection, _Subject
+from .. import Connection, _Subject, _Dictionary
 
 def set_p2_id():
     p2.id = ''
@@ -67,13 +67,13 @@ def test_read_only():
     nose.tools.assert_raises(AttributeError, set_p2_resources)
 
 def test_subjects():
-    assert isinstance(p.subjects, dict)
+    assert isinstance(p.subjects, _Dictionary)
     # label of a subject
     assert 'OAS2_0001' in p.subjects
     # ID of the same subject
     assert 'CENTRAL_S00081' not in p.subjects
     assert isinstance(p.subjects['OAS2_0001'], _Subject)
-    assert isinstance(p.subjects_by_id, dict)
+    assert isinstance(p.subjects_by_id, _Dictionary)
     assert 'CENTRAL_S00088' in p.subjects_by_id
     assert 'OAS2_0010' not in p.subjects_by_id
     assert isinstance(p.subjects_by_id['CENTRAL_S00088'], _Subject)

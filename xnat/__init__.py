@@ -288,12 +288,14 @@ class _Project(object):
         return self._attributes[name]
 
     def _get_subjects(self):
-        self._subjects = {}
-        self._subjects_by_id = {}
+        subjects = []
+        subjects_by_id = []
         for s in self.pyxnat_project.subjects():
             label = s.label()
-            self._subjects[label] = _Subject(self, label)
-            self._subjects_by_id[s.id()] = _Subject(self, label)
+            subjects.append((label, _Subject(self, label)))
+            subjects_by_id.append((s.id(), _Subject(self, label)))
+        self._subjects = _Dictionary(subjects)
+        self._subjects_by_id = _Dictionary(subjects_by_id)
         return
 
     def create_subject(self, label):
@@ -356,9 +358,10 @@ class _Project(object):
     @property
     def resources(self):
         if self._resources is None:
-            self._resources = {}
+            resources = []
             for label in self.pyxnat_project.resources().get('label'):
-                self._resources[label] = _ProjectResource(self, label)
+                resources.append((label, _ProjectResource(self, label)))
+            self._resources = _Dictionary(resources)
         return self._resources
 
 class _Subject(object):
@@ -385,12 +388,14 @@ class _Subject(object):
         return self.pyxnat_subject.get()
 
     def _set_experiments(self):
-        self._experiments = {}
-        self._experiments_by_id = {}
+        experiments = []
+        experiments_by_id = []
         for e in self.pyxnat_subject.experiments():
             label = e.label()
-            self._experiments[label] = _Experiment(self, label)
-            self._experiments_by_id[e.id()] = _Experiment(self, label)
+            experiments.append((label, _Experiment(self, label)))
+            experiments_by_id.append((e.id(), _Experiment(self, label)))
+        self._experiments = _Dictionary(experiments)
+        self._experiments_by_id = _Dictionary(experiments_by_id)
         return
 
     @property
@@ -448,9 +453,10 @@ class _Subject(object):
     @property
     def resources(self):
         if self._resources is None:
-            self._resources = {}
+            resources = []
             for label in self.pyxnat_subject.resources().get('label'):
-                self._resources[label] = _SubjectResource(self, label)
+                resources.append((label, _SubjectResource(self, label)))
+            self._resources = _Dictionary(resources)
         return self._resources
 
 class _Experiment(object):
@@ -483,25 +489,28 @@ class _Experiment(object):
     @property
     def scans(self):
         if self._scans is None:
-            self._scans = {}
+            scans = []
             for id in self.pyxnat_experiment.scans().get():
-                self._scans[id] = _Scan(self, id)
+                scans.append((id, _Scan(self, id)))
+            self._scans = _Dictionary(scans)
         return self._scans
 
     @property
     def reconstructions(self):
         if self._reconstructions is None:
-            self._reconstructions = {}
+            reconstructions = []
             for id in self.pyxnat_experiment.reconstructions().get():
-                self._reconstructions[id] = _Reconstruction(self, id)
+                reconstructions.append((id, _Reconstruction(self, id)))
+            self._reconstructions = _Dictionary(reconstructions)
         return self._reconstructions
 
     @property
     def assessments(self):
         if self._assessments is None:
-            self._assessments = {}
+            assessments = []
             for label in self.pyxnat_experiment.assessors().get('label'):
-                self._assessments[label] = _Assessment(self, label)
+                assessments.append((label, _Assessment(self, label)))
+            self._assessments = _Dictionary(assessments)
         return self._assessments
 
     @property
@@ -522,17 +531,18 @@ class _Experiment(object):
                 if not "Field not found: 'wrk:workflowData/label'" in str(data):
                     raise
                 w_ids = []
-            for w_id in w_ids:
-                w_id = int(w_id)
-                self._workflows[w_id] = _Workflow(self, w_id)
+            w_ids = [ int(w_id) for w_id in w_ids ]
+            workflows = [ _Workflow(self, w_id) for w_id in w_ids ]
+            self._workflows = _Dictionary(zip(w_ids, workflows))
         return self._workflows
 
     @property
     def resources(self):
         if self._resources is None:
-            self._resources = {}
+            resources = []
             for label in self.pyxnat_experiment.resources().get('label'):
-                self._resources[label] = _ExperimentResource(self, label)
+                resources.append((label, _ExperimentResource(self, label)))
+            self._resources = _Dictionary(resources)
         return self._resources
 
 class _Scan(object):
@@ -557,9 +567,10 @@ class _Scan(object):
     @property
     def resources(self):
         if self._resources is None:
-            self._resources = {}
+            resources = []
             for label in self.pyxnat_scan.resources().get('label'):
-                self._resources[label] = _ScanResource(self, label)
+                resources.append((label, _ScanResource(self, label)))
+            self._resources = _Dictionary(resources)
         return self._resources
 
 class _Reconstruction(object):
@@ -586,17 +597,19 @@ class _Reconstruction(object):
     @property
     def in_resources(self):
         if self._in_resources is None:
-            self._in_resources = {}
+            resources = []
             for label in self.pyxnat_reconstruction.in_resources().get('label'):
-                self._in_resources[label] = _ReconstructionInResource(self, label)
+                resources.append((label, _ReconstructionInResource(self, label)))
+            self._in_resources = _Dictionary(resources)
         return self._in_resources
 
     @property
     def out_resources(self):
         if self._out_resources is None:
-            self._out_resources = {}
+            resources = []
             for label in self.pyxnat_reconstruction.out_resources().get('label'):
-                self._out_resources[label] = _ReconstructionOutResource(self, label)
+                resources.append((label, _ReconstructionOutResource(self, label)))
+            self._out_resources = _Dictionary(resources)
         return self._out_resources
 
 class _Assessment(object):
@@ -624,17 +637,19 @@ class _Assessment(object):
     @property
     def in_resources(self):
         if self._in_resources is None:
-            self._in_resources = {}
+            resources = []
             for label in self.pyxnat_assessment.in_resources().get('label'):
-                self._in_resources[label] = _AssessmentInResource(self, label)
+                resources.append((label, _AssessmentInResource(self, label)))
+            self._in_resources = _Dictionary(resources)
         return self._in_resources
 
     @property
     def out_resources(self):
         if self._out_resources is None:
-            self._out_resources = {}
+            resources = []
             for label in self.pyxnat_assessment.out_resources().get('label'):
-                self._out_resources[label] = _AssessmentOutResource(self, label)
+                resources.append((label, _AssessmentOutResource(self, label)))
+            self._out_resources = _Dictionary(resources)
         return self._out_resources
 
 class _BaseResource(object):
@@ -658,10 +673,11 @@ class _ProjectResource(_BaseResource):
     @property
     def files(self):
         if self._files is None:
-            self._files = {}
+            files = []
             for f in self.pyxnat_resource.files():
                 path = f.attributes()['path']
-                self._files[path] = _File(self, self, path)
+                files.append((path, _File(self, self, path)))
+            self._files = _Dictionary(files)
         return self._files
 
 class _SubjectResource(_BaseResource):
@@ -682,10 +698,11 @@ class _SubjectResource(_BaseResource):
     @property
     def files(self):
         if self._files is None:
-            self._files = {}
+            files = []
             for f in self.pyxnat_resource.files():
                 path = f.attributes()['path']
-                self._files[path] = _File(self, self, path)
+                files.append((path, _File(self, self, path)))
+            self._files = _Dictionary(files)
         return self._files
 
 class _ExperimentResource(_BaseResource):
@@ -707,10 +724,11 @@ class _ExperimentResource(_BaseResource):
     @property
     def files(self):
         if self._files is None:
-            self._files = {}
+            files = []
             for f in self.pyxnat_resource.files():
                 path = f.attributes()['path']
-                self._files[path] = _File(self, self, path)
+                files.append((path, _File(self, self, path)))
+            self._files = _Dictionary(files)
         return self._files
 
 class _ScanResource(_BaseResource):
@@ -745,10 +763,11 @@ class _ScanResource(_BaseResource):
     @property
     def files(self):
         if self._files is None:
-            self._files = {}
+            files = []
             for f in self._primary_resource.pyxnat_resource.files():
                 path = f.attributes()['path']
-                self._files[path] = _File(self, self._primary_resource, path)
+                files.append((path, _File(self, self._primary_resource, path)))
+            self._files = _Dictionary(files)
         return self._files
 
 class _BaseReconstructionResource(_BaseResource):
@@ -756,10 +775,11 @@ class _BaseReconstructionResource(_BaseResource):
     @property
     def files(self):
         if self._files is None:
-            self._files = {}
+            files = []
             for f in self.pyxnat_resource.files():
                 path = f.attributes()['path']
-                self._files[path] = _File(self, self, path)
+                files.append((path, _File(self, self, path)))
+            self._files = _Dictionary(files)
         return self._files
 
 class _ReconstructionInResource(_BaseReconstructionResource):
@@ -801,10 +821,11 @@ class _BaseAssessmentResource(_BaseResource):
     @property
     def files(self):
         if self._files is None:
-            self._files = {}
+            files = []
             for f in self.pyxnat_resource.files():
                 path = f.attributes()['path']
-                self._files[path] = _File(self, self, path)
+                files.append((path, _File(self, self, path)))
+            self._files = _Dictionary(files)
         return self._files
 
 class _AssessmentInResource(_BaseAssessmentResource):

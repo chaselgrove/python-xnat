@@ -1,7 +1,7 @@
 import uuid
 import nose.tools
 import pyxnat.core.resources
-from .. import Connection, _Subject, _Experiment
+from .. import Connection, _Subject, _Experiment, _Dictionary
 
 def set_s2_connection():
     s2.connection = ''
@@ -79,13 +79,13 @@ def test_projects():
     assert c.projects['CENTRAL_OASIS_CS'] in s.projects
 
 def test_experiments():
-    assert isinstance(s.experiments, dict)
+    assert isinstance(s.experiments, _Dictionary)
     # label of an experiment
     assert 'Human_Buckner_Case01' in s.experiments
     # ID of the same experiment
     assert 'OAS1_0054_MR1' not in s.experiments
     assert isinstance(s.experiments['Human_Buckner_Case01'], _Experiment)
-    assert isinstance(s.experiments_by_id, dict)
+    assert isinstance(s.experiments_by_id, _Dictionary)
     assert 'OAS1_0054_MR1' in s.experiments_by_id
     assert 'Human_Buckner_Case01' not in s.experiments_by_id
     assert isinstance(s.experiments_by_id['OAS1_0054_MR1'], _Experiment)

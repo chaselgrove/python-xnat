@@ -1,6 +1,6 @@
 import nose.tools
 import pyxnat.core.resources
-from .. import Connection, _Subject, _ProjectResource, _SubjectResource, _ExperimentResource, _ScanResource, _ReconstructionInResource, _ReconstructionOutResource, _AssessmentInResource, _AssessmentOutResource
+from .. import Connection, _Subject, _ProjectResource, _SubjectResource, _ExperimentResource, _ScanResource, _ReconstructionInResource, _ReconstructionOutResource, _AssessmentInResource, _AssessmentOutResource, _Dictionary
 
 def setup():
     global c, project, subject, experiment, scan, assessment, reconstruction
@@ -13,32 +13,32 @@ def setup():
     assessment = c.projects['nosetests'].subjects['resource_test'].experiments['resource_test_MR'].assessments['assessment']
 
 def test_project_resources():
-    assert isinstance(project.resources, dict)
+    assert isinstance(project.resources, _Dictionary)
     assert 'hx' in project.resources
     assert isinstance(project.resources['hx'], _ProjectResource)
     assert len(project.resources) == 1
 
 def test_subject_resources():
-    assert isinstance(subject.resources, dict)
+    assert isinstance(subject.resources, _Dictionary)
     assert 'hx' in subject.resources
     assert isinstance(subject.resources['hx'], _SubjectResource)
     assert len(subject.resources) == 1
 
 def test_experiment_resources():
-    assert isinstance(experiment.resources, dict)
+    assert isinstance(experiment.resources, _Dictionary)
     assert 'hx' in experiment.resources
     assert isinstance(experiment.resources['hx'], _ExperimentResource)
     assert len(subject.resources) == 1
 
 def test_scan_resources():
-    assert isinstance(scan.resources, dict)
+    assert isinstance(scan.resources, _Dictionary)
     assert 'ANALYZE' in scan.resources
     assert isinstance(scan.resources['ANALYZE'], _ScanResource)
     assert len(scan.resources) == 1
 
 def test_reconstruction_resources():
-    assert isinstance(reconstruction.in_resources, dict)
-    assert isinstance(reconstruction.out_resources, dict)
+    assert isinstance(reconstruction.in_resources, _Dictionary)
+    assert isinstance(reconstruction.out_resources, _Dictionary)
     assert 'tir' in reconstruction.in_resources
     assert 'tor' in reconstruction.out_resources
     assert isinstance(reconstruction.in_resources['tir'], _ReconstructionInResource)
@@ -47,8 +47,8 @@ def test_reconstruction_resources():
     assert len(reconstruction.out_resources) == 1
 
 def test_assessment_resources():
-    assert isinstance(assessment.in_resources, dict)
-    assert isinstance(assessment.out_resources, dict)
+    assert isinstance(assessment.in_resources, _Dictionary)
+    assert isinstance(assessment.out_resources, _Dictionary)
     assert 'tia' in assessment.in_resources
     assert 'toa' in assessment.out_resources
     assert isinstance(assessment.in_resources['tia'], _AssessmentInResource)

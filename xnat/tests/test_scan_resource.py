@@ -1,5 +1,5 @@
 import pyxnat.core.resources
-from .. import Connection, _File
+from .. import Connection, _File, _Dictionary
 
 def setup():
     global connection, project, subject, experiment, scan, resource
@@ -23,7 +23,7 @@ def test_attributes():
     assert resource.label == 'ANALYZE'
 
 def test_files():
-    assert isinstance(resource.files, dict)
+    assert isinstance(resource.files, _Dictionary)
     assert 'OAS1_0054_MR1_mpr-1_anon.img' in resource.files
     assert isinstance(resource.files['OAS1_0054_MR1_mpr-1_anon.img'], _File)
     assert 'xxxxxxxx' not in resource.files
