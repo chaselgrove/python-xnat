@@ -63,8 +63,13 @@ class _Dictionary:
     def __len__(self):
         return len(self._dict)
 
-#    def __repr__
-#    def __str__ -- not needed if repr is set --
+    def __repr__(self):
+        parts = []
+        for (key, value) in self.iteritems():
+            parts.append('%s: %s' % (repr(key), repr(value)))
+        parts = [ '%s: %s' % (repr(k), repr(v)) for (k, v) in self.iteritems() ]
+        return '{%s}' % ', '.join(parts)
+
     def has_key(self, key):
         return key in self._dict
 
