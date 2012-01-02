@@ -8,6 +8,8 @@ This module provides access to XNAT instances using an object model based on XNA
 
 The XNAT hierarchy can be navigated with this module in a manner analogous to that used when navigating an XNAT web site.  So subjects, for instance, are accessed from project objects using the subjects' label within that project.  The resulting subject object will have properties of the subject as it appears in that project, even if the subject is shared into the project and belongs to another project.  Labels are used for addressing where possible, and IDs are secondary.  (Some objects, like scans and reconstructions, have no labels, so their ID must be used for addressing.)
 
+All dictionaries containing child entities (such as _Project.subjects or _Subject.experiments_by_id) are implemented by immutable, ordered dictionaries.  Items cannot be added to or removed from these dictionaries, and iteration results in the order returned by XNAT (so scans, for example, are returned as expected).
+
 Debugging can be turned on by setting the environment variable PYTHON_XNAT_DEBUG.  Setting this variable to "pyxnat" will also turn on debugging in the underlying pyxnat module.
 
 Exceptions
