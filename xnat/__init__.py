@@ -488,6 +488,10 @@ class _Experiment(object):
                                                    self.subject.label)
 
     @property
+    def label(self):
+        return self._label
+
+    @property
     def subject(self):
         return self._subject
 
@@ -592,6 +596,10 @@ class _Scan(object):
 
     def __repr__(self):
         return '<Scan %s for Experiment %s>' % (self.id, self.experiment.label)
+
+    @property
+    def pyxnat_scan(self):
+        return self._pyxnat_scan
 
     @property
     def experiment(self):
