@@ -467,15 +467,15 @@ class _Subject(object):
 class _Experiment(object):
 
     def __init__(self, subject, label):
-        self.label = label
-        self.subject = subject
-        self.project = self.subject.project
-        self.pyxnat_experiment = self.subject.pyxnat_subject.experiment(self.label)
-        self.id = self.pyxnat_experiment.id()
+        self._label = label
+        self._subject = subject
+        self._project = self.subject.project
+        self._pyxnat_experiment = self.subject.pyxnat_subject.experiment(self.label)
+        self._id = self.pyxnat_experiment.id()
         primary_subject_label = self.subject.primary_project.pyxnat_project.subject(self.subject.id).label()
-        self.primary_subject = self.subject.primary_project.subjects[primary_subject_label]
-        self.primary_label = self.primary_subject.pyxnat_subject.experiment(self.id).label()
-        self.connection = self.subject.connection
+        self._primary_subject = self.subject.primary_project.subjects[primary_subject_label]
+        self._primary_label = self.primary_subject.pyxnat_subject.experiment(self.id).label()
+        self._connection = self.subject.connection
         self._scans = None
         self._reconstructions = None
         self._assessments = None
@@ -486,6 +486,34 @@ class _Experiment(object):
     def __repr__(self):
         return '<Experiment %s for Subject %s>' % (self.label, 
                                                    self.subject.label)
+
+    @property
+    def subject(self):
+        return self._subject
+
+    @property
+    def project(self):
+        return self._project
+
+    @property
+    def pyxnat_experiment(self):
+        return self._pyxnat_experiment
+
+    @property
+    def id(self):
+        return self._id
+
+    @property
+    def primary_subject(self):
+        return self._primary_subject
+
+    @property
+    def primary_label(self):
+        return self._primary_label
+
+    @property
+    def connection(self):
+        return self._connection
 
     @property
     def xml(self):

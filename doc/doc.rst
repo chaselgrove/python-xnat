@@ -177,46 +177,46 @@ Experiment objects should not be instantiated directly, but should be accessed u
 
 Similar to subjects, this module handles experiments as members of subjects, so a shared experiment can be represented by several different experiment objects, one for each subject.  The label and subject attributes will vary depending on the subject of interest, but the id, primary_subject, and primary_label attributes are the same for experiments in different subjects.
 
-connection
+connection (read only)
     The connection object for the experiment.
 
-project
+project (read only)
     The project object for the experiment.
 
-id
+id (read only)
     The experiment ID.
 
-pyxnat_experiment
+pyxnat_experiment (read only)
     The pyxnat Experiment object for this experiment.
 
-xml
+xml (read only)
     The XNAT XML for the experiment.
 
-subject
+subject (read only)
     The subject to which this experiment belongs.
 
-label
+label (read only)
     The label for this experiment in the parent subject.
 
-primary_subject
+primary_subject (read only)
     The experiment's primary subject.
 
-primary_label
+primary_label (read only)
     The experiment's primary label (the label of the experiment in the primary subject).
 
-scans
+scans (read only)
     A dictionary of scans in this experiment.  Keys are scan ID.
 
-reconstructions
+reconstructions (read only)
     A dictionary of reconstructions in this experiment.  Keys are reconstruction IDs.
 
-assessments
+assessments (read only)
     A dictionary of assessments in this experiment.  Keys are assessment labels.
 
-resources
+resources (read only)
     A dictionary of resources in this experiment.  Keys are resource labels.
 
-workflows
+workflows (read only)
     A dictionary of workflows in this experiment.  Keys are workflow IDs.
 
 Scan Objects
