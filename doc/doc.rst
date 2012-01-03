@@ -224,28 +224,28 @@ Scan Objects
 
 Scan objects should not be instantiated directly, but should be accessed using the scan attribute of experiment objects.
 
-connection
+connection (read only)
     The connection object for the scan.
 
-project
+project (read only)
     The project object for the scan.
 
-subject
+subject (read only)
     The subject object for the scan.
 
-experiment
+experiment (read only)
     The experiment object for the scan.
 
-id
+id (read only)
     The scan ID.
 
-pyxnat_scan
+pyxnat_scan (read only)
     The pyxnat Scan object for the scan.
 
-xml
+xml (read only)
     The XNAT XML for the scan.
 
-resources
+resources (read only)
     A dictionary of resources for this scan.  Keys are resource labels.
 
 Reconstruction Objects
