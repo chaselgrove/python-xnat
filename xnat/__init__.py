@@ -609,12 +609,12 @@ class _Scan(object):
 class _Reconstruction(object):
 
     def __init__(self, experiment, id):
-        self.experiment = experiment
-        self.subject = self.experiment.subject
-        self.project = self.subject.project
-        self.connection = self.project.connection
-        self.id = id
-        self.pyxnat_reconstruction = self.experiment.pyxnat_experiment.reconstruction(self.id)
+        self._experiment = experiment
+        self._subject = self.experiment.subject
+        self._project = self.subject.project
+        self._connection = self.project.connection
+        self._id = id
+        self._pyxnat_reconstruction = self.experiment.pyxnat_experiment.reconstruction(self.id)
         self._in_resources = None
         self._out_resources = None
         return
@@ -622,6 +622,30 @@ class _Reconstruction(object):
     def __repr__(self):
         return '<Reconstruction %s for Experiment %s>' % (self.id, 
                                                           self.experiment.label)
+
+    @property
+    def experiment(self):
+        return self._experiment
+
+    @property
+    def subject(self):
+        return self._subject
+
+    @property
+    def project(self):
+        return self._project
+
+    @property
+    def connection(self):
+        return self._connection
+
+    @property
+    def id(self):
+        return self._id
+
+    @property
+    def pyxnat_reconstruction(self):
+        return self._pyxnat_reconstruction
 
     @property
     def xml(self):
