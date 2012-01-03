@@ -285,34 +285,34 @@ Assessment Objects
 
 Assessment objects should not be instantiated directly, but should be accessed using the assessment attribute of experiment objects.
 
-connection
+connection (read only)
     The connection object for this assessment.
 
-project
+project (read only)
     The project object for this assessment.
 
-subject
+subject (read only)
     The subject object for this assessment.
 
-experiment
+experiment (read only)
     The experiment object for this assessment.
 
-id
+id (read only)
     The assessment ID.
 
-label
+label (read only)
     The assessment label.
 
-pyxnat_assessment
+pyxnat_assessment (read only)
     The pyxnat Assessor object for this assessment.
 
-xml
+xml (read only)
     The XNAT XML for this assessment.
 
-in_resources
+in_resources (read only)
     A dictionary of input resources for this assessment.  Keys are resource labels.
 
-out_resources
+out_resources (read only)
     A dictionary of output resources for this assessment.  Keys are resource labels.
 
 Workflow Objects
