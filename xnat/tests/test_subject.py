@@ -1,14 +1,12 @@
-import uuid
 import nose.tools
 import pyxnat.core.resources
 from .. import Connection, _Subject, _Experiment, _Dictionary
 
 def setup():
-    global c, p, s, s2
+    global c, p, s
     c = Connection('https://central.xnat.org', 'nosetests', 'nosetests')
     p = c.projects['PALS']
     s = p.subjects['Human_Buckner_Case01']
-    s2 = c.projects['nosetests'].create_subject(uuid.uuid1().hex)
 
 def test_attributes():
     assert s.connection is c
@@ -43,7 +41,6 @@ def test_experiments():
     s.experiments_by_id['OAS1_0054_MR1'].label == 'Human_Buckner_Case01'
 
 def teardown():
-    s2.pyxnat_subject.delete()
     c.close()
 
 # eof
