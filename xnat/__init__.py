@@ -292,7 +292,7 @@ class _Project(object):
             self._attributes = dict(zip(lower_names, values))
         return self._attributes[name]
 
-    def _get_subjects(self):
+    def _set_subjects(self):
         subjects = []
         subjects_by_id = []
         for s in self.pyxnat_project.subjects():
@@ -335,13 +335,13 @@ class _Project(object):
     @property
     def subjects(self):
         if self._subjects is None:
-            self._get_subjects()
+            self._set_subjects()
         return self._subjects
 
     @property
     def subjects_by_id(self):
         if self._subjects_by_id is None:
-            self._get_subjects()
+            self._set_subjects()
         return self._subjects_by_id
 
     @property
