@@ -170,6 +170,9 @@ experiments_by_id (read only)
 resources (read only)
     A dictionary of subject resources.  Keys are resource labels.
 
+create_experiment(label[, type])
+    Create an experiment with the given label.  If the experiment exists, raises ValueError.  If the subject has been deleted, raises DoesNotExistError.  type is an XNAT experiment type (such as xnat:mrSession); default determined by pyxnat.
+
 Experiment Objects
 ------------------
 
@@ -218,6 +221,9 @@ resources (read only)
 
 workflows (read only)
     A dictionary of workflows in this experiment.  Keys are workflow IDs.
+
+create_scan(id[, type])
+    Create a scan with the given ID.  If the scan exists, raises ValueError.  If the experiment has been deleted, raises DoesNotExistError.  type is an XNAT scan type (such as xnat:mrScan); default is determined by pyxnat.
 
 Scan Objects
 ------------

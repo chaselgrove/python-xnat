@@ -403,6 +403,21 @@ class _Subject(object):
         self._experiments_by_id = _Dictionary(experiments_by_id)
         return
 
+    def create_experiment(self, label, type=None):
+        if not self.pyxnat_subject.exists():
+            raise DoesNotExistError('Subject %s does not exist' % self.id)
+        pyxnat_experiment = self.pyxnat_subject.experiment(label)
+        if pyxnat_experiment.exists():
+            raise ValueError('experiment %s exists for subject %s' % (label, self.id))
+        if type:
+            pyxnat_experiment.create(experiments=type)
+        else:
+            pyxnat_experiment.create()
+        assert pyxnat_experiment.exists()
+        self._experiments = None
+        self._experiments_by_id = None
+        return self.experiments[label]
+
     @property
     def project(self):
         return self._project
@@ -581,6 +596,20 @@ class _Experiment(object):
                 resources.append((label, _ExperimentResource(self, label)))
             self._resources = _Dictionary(resources)
         return self._resources
+
+    def create_scan(self, id, type=None):
+        if not self.pyxnat_experiment.exists():
+            raise DoesNotExistError('Experiment %s does not exist' % self.id)
+        pyxnat_scan = self.pyxnat_experiment.scan(id)
+        if pyxnat_scan.exists():
+            raise ValueError('scan %s exists for experiment %s' % (id, self.id))
+        if type:
+            pyxnat_scan.create(scans=type)
+        else:
+            pyxnat_scan.create()
+        assert pyxnat_scan.exists()
+        self._scans = None
+        return self.scans[id]
 
 class _Scan(object):
 

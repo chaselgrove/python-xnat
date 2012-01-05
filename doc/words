@@ -11,6 +11,8 @@ XNAT
 XNAT's
 XNATError
 datetime
+mrScan
+mrSession
 pyxnat
 stdin
 uri
