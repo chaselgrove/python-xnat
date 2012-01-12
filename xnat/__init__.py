@@ -1030,6 +1030,12 @@ class _File(object):
         fname = self.pyxnat_file.get()
         return open(fname).read()
 
+    def get(self, path):
+        fo = open(path, 'w')
+        fo.write(self.read())
+        fo.close()
+        return
+
 class _Workflow(object):
 
     def __init__(self, experiment, id):

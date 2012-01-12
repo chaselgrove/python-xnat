@@ -437,3 +437,6 @@ last_modified
 
 read()
     Return the contents of the file.
+
+get(path)
+    Download the file to a local path.  f.get(path) is equivalent to open(path, 'w').write(f.read()).
