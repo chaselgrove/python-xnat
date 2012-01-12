@@ -415,6 +415,12 @@ label
 files
     A list of File objects in the resource.
 
+create_file(data, remote_path)
+    Create a file in the resource from the passed data.  remote_path is the path of the file relative to the resource.  If the resource has been deleted, raises DoesNotExistError.  If the remote file exists, raises ValueError.
+
+put_file(local_path, remote_path)
+    Upload a local file to the resource.  r.put_file(local_path, remote_path) is equivalent to r.create_file(open(local_path).read(), remote_path).
+
 File Objects
 ------------
 
@@ -433,13 +439,16 @@ path
     The path of the file relative to the resource.
 
 size
-    The size in bytes of the file.
+    The size in bytes of the file.  Raises DoesNotExistError if the file has already been deleted.
 
 last_modified
-    The (datetime.datetime) time of last modification.
+    The (datetime.datetime) time of last modification.  Raises DoesNotExistError if the file has already been deleted.
 
 read()
-    Return the contents of the file.
+    Return the contents of the file.  Raises DoesNotExistError if the file has already been deleted.
 
-get(path)
-    Download the file to a local path.  f.get(path) is equivalent to open(path, 'w').write(f.read()).
+get(local_path)
+    Download the file.  f.get(local_path) is equivalent to open(local_path, 'w').write(f.read()).  Raises DoesNotExistError if the file has already been deleted.
+
+delete()
+    Removes the file from the server.  Raises DoesNotExistError if the file has already been deleted.

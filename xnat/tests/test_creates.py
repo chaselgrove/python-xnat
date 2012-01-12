@@ -1,11 +1,16 @@
+import os
 import uuid
 import nose.tools
 import pyxnat.core.resources
-from .. import Connection, _Subject, _Experiment, DoesNotExistError, _Scan, _ScanResource
+from .. import Connection, _Subject, _Experiment, DoesNotExistError, _Scan, _ScanResource, _File
 
 scan_id = '1'
 scan_id_2 = '2'
 scan_resource_label = 'srid'
+test_file_data = 'px test data'
+remote_path_1 = 'fname1'
+remote_path_2 = 'fname2'
+test_fname = '%s/test_file.data' % os.path.dirname(__file__)
 
 def setup():
     global c, project, new_subject_label
@@ -39,6 +44,7 @@ def test_create_scan():
     nose.tools.assert_raises(ValueError, lambda: new_experiment.create_scan(scan_id))
 
 def test_create_scan_resource():
+    global resource
     assert scan_resource_label not in new_scan.resources
     resource = new_scan.create_resource(scan_resource_label)
     assert isinstance(resource, _ScanResource)
@@ -46,11 +52,40 @@ def test_create_scan_resource():
     assert scan_resource_label in new_scan.resources
     nose.tools.assert_raises(ValueError, lambda: new_scan.create_resource(scan_resource_label))
 
+def test_create_file():
+    assert remote_path_1 not in resource.files
+    file = resource.create_file(test_file_data, remote_path_1)
+    assert isinstance(file, _File)
+    assert file.read() == test_file_data
+    assert remote_path_1 in resource.files
+    nose.tools.assert_raises(ValueError, lambda: resource.create_file(test_file_data, remote_path_1))
+
+def test_put_file():
+    file_data = open(test_fname).read()
+    assert remote_path_2 not in resource.files
+    file = resource.put_file(test_fname, remote_path_2)
+    assert isinstance(file, _File)
+    assert file.read() == file_data
+    assert remote_path_2 in resource.files
+    nose.tools.assert_raises(ValueError, lambda: resource.create_file(file_data, remote_path_2))
+
+def test_delete_file():
+    file = resource.files[remote_path_1]
+    file.delete()
+    assert remote_path_1 not in resource.files
+    nose.tools.assert_raises(DoesNotExistError, lambda: file.delete())
+    nose.tools.assert_raises(DoesNotExistError, lambda: file.read())
+    nose.tools.assert_raises(DoesNotExistError, lambda: file.get(''))
+    nose.tools.assert_raises(DoesNotExistError, lambda: file.last_modified)
+    nose.tools.assert_raises(DoesNotExistError, lambda: file.size)
+
 def test_create_no_experiment():
     new_scan_label_2 = '2'
     new_experiment.pyxnat_experiment.delete()
     nose.tools.assert_raises(DoesNotExistError, lambda: new_experiment.create_scan(new_scan_label_2))
     nose.tools.assert_raises(DoesNotExistError, lambda: new_scan.create_resource(scan_resource_label))
+    nose.tools.assert_raises(DoesNotExistError, lambda: resource.create_file(test_file_data, remote_path_1))
+    nose.tools.assert_raises(DoesNotExistError, lambda: resource.put_file(test_fname, remote_path_1))
 
 def test_create_no_subject():
     new_experiment_label_2 = uuid.uuid1().hex

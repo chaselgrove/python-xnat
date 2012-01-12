@@ -806,7 +806,19 @@ class _Assessment(object):
 
 class _BaseResource(object):
 
-    pass
+    def create_file(self, data, remote_path):
+        if not self.pyxnat_resource.exists():
+            raise DoesNotExistError('Resource %s does not exist' % self.label)
+        pyxnat_file = self.pyxnat_resource.file(remote_path)
+        if pyxnat_file.exists():
+            raise ValueError('file %s exists for resource %s' % (remote_path, self.label))
+        pyxnat_file.create(data)
+        self._files = None
+        return self.files[remote_path]
+
+    def put_file(self, local_path, remote_path):
+        data = open(local_path).read()
+        return self.create_file(data, remote_path)
 
 class _ProjectResource(_BaseResource):
 
@@ -1030,20 +1042,35 @@ class _File(object):
 
     @property
     def size(self):
+        if not self.pyxnat_file.exists():
+            raise DoesNotExistError('file %s does not exist' % self.path)
         return int(self.pyxnat_file.size())
 
     @property
     def last_modified(self):
+        if not self.pyxnat_file.exists():
+            raise DoesNotExistError('file %s does not exist' % self.path)
         return dateutil.parser.parse(self.pyxnat_file.last_modified())
 
     def read(self):
+        if not self.pyxnat_file.exists():
+            raise DoesNotExistError('file %s does not exist' % self.path)
         fname = self.pyxnat_file.get()
         return open(fname).read()
 
     def get(self, path):
+        if not self.pyxnat_file.exists():
+            raise DoesNotExistError('file %s does not exist' % self.path)
         fo = open(path, 'w')
         fo.write(self.read())
         fo.close()
+        return
+
+    def delete(self):
+        if not self.pyxnat_file.exists():
+            raise DoesNotExistError('file %s does not exist' % self.path)
+        self.pyxnat_file.delete()
+        self.resource._files = None
         return
 
 class _Workflow(object):
