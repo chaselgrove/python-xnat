@@ -663,6 +663,16 @@ class _Scan(object):
             self._resources = _Dictionary(resources)
         return self._resources
 
+    def create_resource(self, label):
+        if not self.pyxnat_scan.exists():
+            raise DoesNotExistError('Scan %s does not exist' % self.id)
+        resource = self.pyxnat_scan.resource(label)
+        if resource.exists():
+            raise ValueError('resource %s exists for scan %s' % (label, self.id))
+        resource.create()
+        self._resources = None
+        return self.resources[label]
+
 class _Reconstruction(object):
 
     def __init__(self, experiment, id):

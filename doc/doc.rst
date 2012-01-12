@@ -254,6 +254,9 @@ xml (read only)
 resources (read only)
     A dictionary of resources for this scan.  Keys are resource labels.
 
+create_resource(label)
+    Create a resource with the given label.  If the resource exists, raises ValueError.  If the scan (or an ancestor) has been deleted, raises DoesNotExistError.
+
 Reconstruction Objects
 ----------------------
 
