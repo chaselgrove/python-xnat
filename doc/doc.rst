@@ -415,10 +415,10 @@ label
 files
     A list of File objects in the resource.
 
-create_file(data, remote_path)
+create_file(data, remote_path[, format='U'[, content='U']])
     Create a file in the resource from the passed data.  remote_path is the path of the file relative to the resource.  If the resource has been deleted, raises DoesNotExistError.  If the remote file exists, raises ValueError.
 
-put_file(local_path, remote_path)
+put_file(local_path, remote_path[, format='U'[, content='U']])
     Upload a local file to the resource.  r.put_file(local_path, remote_path) is equivalent to r.create_file(open(local_path).read(), remote_path).
 
 File Objects
@@ -443,6 +443,12 @@ size
 
 last_modified
     The (datetime.datetime) time of last modification.  Raises DoesNotExistError if the file has already been deleted.
+
+format (read only)
+    XNAT's format parameter for the file.
+
+content (read only)
+    XNAT's content parameter for the file.
 
 read()
     Return the contents of the file.  Raises DoesNotExistError if the file has already been deleted.

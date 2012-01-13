@@ -806,19 +806,19 @@ class _Assessment(object):
 
 class _BaseResource(object):
 
-    def create_file(self, data, remote_path):
+    def create_file(self, data, remote_path, format='U', content='U'):
         if not self.pyxnat_resource.exists():
             raise DoesNotExistError('Resource %s does not exist' % self.label)
         pyxnat_file = self.pyxnat_resource.file(remote_path)
         if pyxnat_file.exists():
             raise ValueError('file %s exists for resource %s' % (remote_path, self.label))
-        pyxnat_file.create(data)
+        pyxnat_file.create(data, format=format, content=content)
         self._files = None
         return self.files[remote_path]
 
-    def put_file(self, local_path, remote_path):
+    def put_file(self, local_path, remote_path, format='U', content='U'):
         data = open(local_path).read()
-        return self.create_file(data, remote_path)
+        return self.create_file(data, remote_path, format=format, content=content)
 
 class _ProjectResource(_BaseResource):
 
@@ -1072,6 +1072,14 @@ class _File(object):
         self.pyxnat_file.delete()
         self.resource._files = None
         return
+
+    @property
+    def content(self):
+        return self.pyxnat_file.content()
+
+    @property
+    def format(self):
+        return self.pyxnat_file.format()
 
 class _Workflow(object):
 

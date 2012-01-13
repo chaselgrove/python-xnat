@@ -58,15 +58,19 @@ def test_create_file():
     assert isinstance(file, _File)
     assert file.read() == test_file_data
     assert remote_path_1 in resource.files
+    assert file.content == 'U'
+    assert file.format == 'U'
     nose.tools.assert_raises(ValueError, lambda: resource.create_file(test_file_data, remote_path_1))
 
 def test_put_file():
     file_data = open(test_fname).read()
     assert remote_path_2 not in resource.files
-    file = resource.put_file(test_fname, remote_path_2)
+    file = resource.put_file(test_fname, remote_path_2, format='tformat', content='tcontent')
     assert isinstance(file, _File)
     assert file.read() == file_data
     assert remote_path_2 in resource.files
+    assert file.content == 'tcontent'
+    assert file.format == 'tformat'
     nose.tools.assert_raises(ValueError, lambda: resource.create_file(file_data, remote_path_2))
 
 def test_delete_file():
