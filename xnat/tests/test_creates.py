@@ -7,6 +7,7 @@ from .. import Connection, _Subject, _Experiment, DoesNotExistError, _Scan, _Sca
 scan_id = '1'
 scan_id_2 = '2'
 scan_resource_label = 'srid'
+scan_resource_label_2 = 'srid2'
 test_file_data = 'px test data'
 remote_path_1 = 'fname1'
 remote_path_2 = 'fname2'
@@ -51,6 +52,12 @@ def test_create_scan_resource():
     assert resource.label == scan_resource_label
     assert scan_resource_label in new_scan.resources
     nose.tools.assert_raises(ValueError, lambda: new_scan.create_resource(scan_resource_label))
+
+def test_create_scan_resource_2():
+    scan = c.find_experiment(new_experiment.id).scans[new_scan.id]
+    resource = scan.create_resource(scan_resource_label_2)
+    assert scan_resource_label_2 in scan.resources
+    assert scan_resource_label_2 in new_scan.resources
 
 def test_create_file():
     assert remote_path_1 not in resource.files

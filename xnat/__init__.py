@@ -297,8 +297,9 @@ class _Project(object):
         subjects_by_id = []
         for s in self.pyxnat_project.subjects():
             label = s.label()
-            subjects.append((label, _Subject(self, label)))
-            subjects_by_id.append((s.id(), _Subject(self, label)))
+            so = _Subject(self, label)
+            subjects.append((label, so))
+            subjects_by_id.append((s.id(), so))
         self._subjects = _Dictionary(subjects)
         self._subjects_by_id = _Dictionary(subjects_by_id)
         return
@@ -397,8 +398,9 @@ class _Subject(object):
         experiments_by_id = []
         for e in self.pyxnat_subject.experiments():
             label = e.label()
-            experiments.append((label, _Experiment(self, label)))
-            experiments_by_id.append((e.id(), _Experiment(self, label)))
+            eo = _Experiment(self, label)
+            experiments.append((label, eo))
+            experiments_by_id.append((e.id(), eo))
         self._experiments = _Dictionary(experiments)
         self._experiments_by_id = _Dictionary(experiments_by_id)
         return
