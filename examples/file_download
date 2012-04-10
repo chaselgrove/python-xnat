@@ -1,0 +1,34 @@
+#!/usr/bin/python
+
+# this example drills down to the ANALYZE resource of a scan, reads the 
+# contents of the GIF file in that resource into data and writes a copy of 
+# the file
+#
+# set user and pw for an XNAT Central user and local_path for the name of 
+# the local (downloaded) file
+
+import sys
+import xnat
+
+user = 'xxxx'
+pw = 'xxxx'
+local_path = 'mpr.gif'
+
+conn = xnat.Connection('https://central.xnat.org', user, pw)
+project = conn.projects['CENTRAL_OASIS_CS']
+subject = project.subjects['OAS1_0450']
+experiment = subject.experiments['OAS1_0450_MR1']
+scan = experiment.scans['mpr-1']
+resource = scan.resources['ANALYZE']
+file = resource.files['OAS1_0450_MR1_mpr-1_anon_sag_66.gif']
+
+data = file.read()
+print 'got %d bytes' % len(data)
+
+file.get(local_path)
+
+conn.close()
+
+sys.exit(0)
+
+# eof
